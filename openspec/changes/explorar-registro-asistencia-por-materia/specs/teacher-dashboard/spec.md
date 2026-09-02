@@ -36,6 +36,13 @@ Si el profesor marca manualmente a un alumno que ya tiene un registro por auto-c
 - **WHEN** el profesor marca manualmente a un alumno que ya escaneó el QR, con un estado distinto al registrado
 - **THEN** el sistema muestra una advertencia antes de confirmar el cambio
 
+### Requirement: Resumen de cierre con alumnos sin registrar
+Al cerrarse el registro de una sesión (manual o por cuenta regresiva vencida), el tablero del profesor SHALL mostrar un resumen con el conteo de confirmados y la lista nominal de los alumnos inscritos que no registraron asistencia. Esta lista SHALL ser visible únicamente en el tablero privado del profesor, nunca en la vista pública proyectada.
+
+#### Scenario: Registro se cierra con alumnos pendientes
+- **WHEN** el registro de la sesión se cierra
+- **THEN** el tablero del profesor muestra el resumen de confirmados y la lista con nombre de los alumnos sin registro
+
 ### Requirement: Resúmenes del mes seleccionado
 El tablero SHALL mostrar cinco resúmenes calculados sobre el mes actualmente seleccionado en el calendario: (1) sesiones del día pendientes/completadas, (2) porcentaje de asistencia por grupo, (3) ranking de faltas/tardanzas por alumno, (4) racha de faltas consecutivas por alumno, y (5) conteo de justificantes justificados vs. sin justificar.
 

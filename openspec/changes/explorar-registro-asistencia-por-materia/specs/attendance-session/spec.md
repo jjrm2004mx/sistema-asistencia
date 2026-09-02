@@ -25,6 +25,10 @@ El sistema SHALL mostrar, tanto en la vista pública proyectada como en el table
 - **WHEN** un alumno confirma su asistencia
 - **THEN** el contador visible en ambas vistas se incrementa sin necesidad de recargar la página
 
+#### Scenario: Vista pública no expone nombres de alumnos
+- **WHEN** el registro se cierra o está por cerrarse (cuenta regresiva)
+- **THEN** la vista pública proyectada muestra únicamente el conteo agregado (ej. "27/32 confirmados"), nunca una lista con nombres de alumnos
+
 ### Requirement: Tolerancia configurable por profesor
 Cada profesor SHALL tener un valor de tolerancia en minutos (default del sistema configurable en archivo de propiedades, 5 minutos), aplicado a sus sesiones para determinar si una confirmación cuenta como Presente o Tardanza.
 
@@ -44,7 +48,19 @@ El sistema no SHALL transicionar automáticamente un registro de Tardanza a Falt
 - **THEN** el sistema acepta la confirmación y la marca como Tardanza
 
 ### Requirement: Cierre y reapertura del registro
-El profesor SHALL poder cerrar el registro de una sesión activa, deteniendo nuevas confirmaciones por QR, y reabrirlo cuando lo decida.
+El profesor SHALL poder iniciar el cierre del registro de una sesión activa, lo cual dispara una cuenta regresiva visible y cancelable (duración configurable en el archivo de propiedades del sistema) antes de bloquear nuevas confirmaciones; el profesor SHALL también poder reabrir el registro una vez cerrado.
+
+#### Scenario: Profesor inicia el cierre
+- **WHEN** el profesor pulsa cerrar registro
+- **THEN** el sistema inicia una cuenta regresiva visible tanto en la vista pública proyectada como en el tablero del profesor, y el registro permanece abierto (acepta confirmaciones) mientras la cuenta regresiva corre
+
+#### Scenario: Cuenta regresiva llega a cero
+- **WHEN** la cuenta regresiva de cierre llega a cero sin haber sido cancelada
+- **THEN** el sistema cierra el registro automáticamente y deja de aceptar confirmaciones por QR
+
+#### Scenario: Profesor cancela la cuenta regresiva
+- **WHEN** el profesor cancela la cuenta regresiva antes de que llegue a cero
+- **THEN** el registro permanece abierto indefinidamente, sin cierre, hasta que el profesor vuelva a iniciar el cierre
 
 #### Scenario: Registro cerrado bloquea confirmaciones
 - **WHEN** el registro de una sesión está cerrado
