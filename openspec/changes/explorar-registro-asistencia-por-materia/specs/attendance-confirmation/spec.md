@@ -25,12 +25,16 @@ Tras identificarse correctamente, el sistema SHALL registrar la asistencia del a
 - **WHEN** el alumno se identifica correctamente y el sistema calcula y registra su asistencia
 - **THEN** la vista le muestra su estado resultante (ej. "Registrado: Presente" o "Registrado: Tardanza")
 
-### Requirement: Bloqueo por intentos fallidos de PIN
-El sistema SHALL bloquear nuevos intentos de identificación de un identificador de alumno tras un número configurable de intentos fallidos consecutivos de PIN (default: 15, en archivo de propiedades).
+### Requirement: Bloqueo por intentos fallidos de PIN, compartido entre flujos
+El sistema SHALL bloquear nuevos intentos de identificación de un identificador de alumno tras un número configurable de intentos fallidos consecutivos de PIN (default: 15, en archivo de propiedades). Este contador de intentos y el bloqueo resultante SHALL ser compartido entre este flujo y el de `student-parent-access` — es el mismo identificador+PIN, sin importar desde cuál de los dos endpoints se intente.
 
 #### Scenario: Bloqueo tras agotar intentos
 - **WHEN** un alumno falla su PIN el número de veces configurado
 - **THEN** el sistema bloquea nuevos intentos para ese identificador hasta que el profesor o dirección lo desbloqueen
+
+#### Scenario: Intentos fallidos cuentan sin importar el flujo
+- **WHEN** los intentos fallidos de un mismo identificador se dan combinando confirmación de asistencia y consulta de historial (`student-parent-access`)
+- **THEN** el sistema los cuenta como un solo total hacia el mismo límite, y el bloqueo aplica a ambos flujos por igual
 
 ### Requirement: Identificación completa en cada confirmación, sin reconocimiento de dispositivo
 El sistema SHALL solicitar identificador y PIN completos en cada confirmación de asistencia, sin excepción por dispositivo ya usado previamente. No SHALL existir un mecanismo de "dispositivo reconocido" que omita el PIN, dado que un dispositivo puede ser compartido entre distintos alumnos (hermanos, tablet prestada, dispositivo familiar) — recordar un dispositivo como "ya identificado" arriesgaría atribuir la asistencia al alumno equivocado.
