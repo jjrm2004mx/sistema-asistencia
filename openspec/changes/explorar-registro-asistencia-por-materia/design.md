@@ -75,6 +75,61 @@ Consecuencia directa: el bootstrap manual en base de datos deja de repetirse por
 
 **Razonamiento**: formaliza la decisión implícita en vez de dejarla flotando como una suposición no declarada — sin alternativas nuevas que cambien el cálculo ya hecho en las decisiones de hosting y SSE.
 
+### Organización de paquetes: monolito modular por capability (vertical slices)
+
+**Decisión**: los paquetes del backend se organizan por **capability** (uno por cada una de las 9 del `proposal.md`), con `Controller` → `Service` → `Repository`/`Entity` dentro de cada paquete — no por capa técnica horizontal (`controller/`, `service/`, `repository/` a nivel raíz agrupando todo el proyecto). Sigue siendo un solo artefacto desplegable (la modularidad es interna, no física) — coherente con la decisión de backend/hosting.
+
+```
+com.sistemaasistencia
+├── common/                        # entidades usadas por 3+ capabilities
+│   ├── Plantel.java, PlantelRepository.java, PlantelService.java
+│   └── Cuenta.java, CuentaRepository.java, CuentaService.java   (login unificado)
+│
+├── academic_structure/            # CRUD-heavy, sin capa domain/
+│   ├── Materia.java, Grupo.java, Alumno.java, Inscripcion.java, Asignacion.java
+│   ├── AcademicStructureController.java
+│   ├── AcademicStructureService.java
+│   └── *Repository.java
+│
+├── attendance_session/            # la única con domain/ aislado de Spring/JPA
+│   ├── domain/
+│   │   ├── EstadoSesionClase.java     (transiciones ABIERTA→CERRANDO→CERRADA)
+│   │   ├── TokenQr.java               (rotación/expiración)
+│   │   └── ReglaTolerancia.java       (Presente vs Tardanza)
+│   ├── SesionClase.java, RegistroAsistencia.java   (entidades JPA)
+│   ├── SesionClaseController.java
+│   ├── SesionClaseSseController.java  (endpoints /eventos/publico y /eventos/profesor)
+│   ├── SesionClaseService.java
+│   └── *Repository.java
+│
+├── attendance_confirmation/       # usa attendance_session.RegistroAsistenciaService
+│   ├── AttendanceConfirmationController.java
+│   ├── AttendanceConfirmationService.java
+│   └── IdentificacionAlumnoService.java   (identificador+PIN, bloqueo por intentos)
+│
+├── attendance_justification/
+│   ├── MotivoJustificacion.java
+│   ├── AttendanceJustificationController.java
+│   └── AttendanceJustificationService.java
+│
+├── teacher_dashboard/             # sin entidades propias, agrega datos de otras capabilities
+├── admin_dashboard/               # ídem, a nivel plantel
+├── student_parent_access/         # ídem, de solo lectura
+├── super_admin_dashboard/         # ídem, cross-plantel
+│
+└── auth_accounts/
+    ├── LoginController.java
+    └── AuthService.java           (login/logout/sesión — Cuenta en sí vive en common/)
+```
+
+`teacher_dashboard`, `admin_dashboard`, `student_parent_access` y `super_admin_dashboard` no son dueños de entidades propias — son capas de agregación/consulta que orquestan servicios de las demás capabilities.
+
+**Alternativas consideradas**:
+- **Capas técnicas horizontales** (`controller/`, `service/`, `repository/`, `model/` a nivel raíz) — evaluada y descartada: es el patrón más familiar de tutoriales Spring Boot, pero con 9 capabilities cada carpeta técnica termina con 10-12 clases sin relación obvia entre sí — encontrar "todo lo de sesión de clase" implica mirar en 4 carpetas distintas en vez de una.
+- **Hexagonal completo (puertos/adaptadores en todo el backend)** — descartado: el valor de hexagonal se paga cuando se espera cambiar infraestructura sin tocar lógica de negocio, o un equipo grande necesita fronteras estrictas — ninguno de los dos aplica aquí (infraestructura ya fijada, desarrollador único). La mayoría de las capabilities son CRUD-heavy; ponerles puertos/adaptadores es indirección sin beneficio real.
+
+**Razonamiento**: por capability calca 1:1 la estructura de `specs/`, así que localizar código para un requirement es directo. Dentro de cada capability, Controller→Service→Repository es la capa de aplicación normal, no ceremonia extra. El aislamiento de dominio (`domain/`) se reserva para `attendance_session`, la única capability con lógica de estado real (máquina de estados de la sesión, rotación de QR, cálculo de tolerancia) que vale la pena proteger de anotaciones de Spring/JPA — el resto no lo necesita.
+
 ### Mecanismo de sesión: HttpSession stateful para login tradicional, sesión corta para alumno/padre
 
 **Decisión**:
