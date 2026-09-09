@@ -11,6 +11,17 @@ Profesor y dirección SHALL autenticarse mediante usuario y contraseña, con cre
 - **WHEN** un profesor ingresa su usuario y contraseña correctos
 - **THEN** el sistema lo autentica y le da acceso a su tablero
 
+### Requirement: Rol explícito por cuenta y enrutamiento post-login
+Cada cuenta de login tradicional SHALL tener un rol explícito — **profesor** o **dirección** — asignado al momento de su alta y no modificable por el propio usuario. El sistema SHALL exponer un único formulario de login para ambos roles; tras autenticar, SHALL redirigir a la cuenta al tablero correspondiente a su rol (`teacher-dashboard` o `admin-dashboard`) sin que el usuario deba seleccionarlo manualmente.
+
+#### Scenario: Login de profesor redirige a su tablero
+- **WHEN** una cuenta con rol profesor se autentica correctamente
+- **THEN** el sistema la redirige a su tablero de profesor
+
+#### Scenario: Login de dirección redirige a su tablero
+- **WHEN** una cuenta con rol dirección se autentica correctamente
+- **THEN** el sistema la redirige a su tablero de dirección
+
 ### Requirement: Aprovisionamiento por contraseña temporal
 Al dar de alta a un profesor, dirección SHALL generar una contraseña temporal que se entrega por fuera del sistema. El sistema no SHALL ofrecer un flujo de auto-registro ni de recuperación de contraseña por el propio profesor.
 
