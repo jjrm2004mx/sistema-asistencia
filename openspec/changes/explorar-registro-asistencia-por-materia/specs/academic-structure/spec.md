@@ -26,6 +26,21 @@ Cada plantel SHALL tener un conjunto de capabilities habilitadas de forma indepe
 - **WHEN** se requiere habilitar o deshabilitar una funcionalidad para un plantel
 - **THEN** el cambio SHALL hacerse mediante un procedimiento operativo manual (configuración/base de datos) fuera de la interfaz del sistema, dado que no existe todavía un rol de super-administrador cross-plantel con una interfaz dedicada para esto
 
+### Requirement: Cupo de cuentas por plantel
+Cada plantel SHALL tener un cupo máximo de cuentas de profesor y un cupo máximo de cuentas de dirección, independientes entre sí, fijados por el operador del sistema mediante el mismo procedimiento manual (configuración/base de datos) que las funcionalidades habilitadas — ver "Funcionalidades habilitadas por plantel" arriba — dado que el modelo de negocio SaaS cobra por licencia/cuenta. Dirección SHALL poder ver su cupo y cuántas cuentas tiene en uso por rol, pero no SHALL tener ningún mecanismo en la interfaz para aumentarlo ella misma.
+
+#### Scenario: Alta dentro del cupo
+- **WHEN** dirección da de alta a un profesor o a otra cuenta de dirección y el plantel no ha alcanzado su cupo para ese rol
+- **THEN** el sistema crea la cuenta con normalidad
+
+#### Scenario: Alta rechazada por cupo alcanzado
+- **WHEN** dirección intenta dar de alta una cuenta de un rol (profesor o dirección) cuyo cupo ya está al máximo
+- **THEN** el sistema rechaza el alta e indica que se alcanzó el cupo de licencias para ese rol
+
+#### Scenario: Ampliar el cupo es manual
+- **WHEN** se requiere aumentar el cupo de cuentas de un plantel (ej. tras renovar o ampliar su licencia)
+- **THEN** el cambio SHALL hacerse mediante el mismo procedimiento operativo manual usado para las funcionalidades habilitadas, no vía autoservicio
+
 ### Requirement: Tipo de identificador de alumno configurable por plantel
 Dirección SHALL configurar, desde su tablero y como parte del setup inicial de su plantel, un único tipo de identificador para sus alumnos — **matrícula** o **correo institucional** — dado que no todas las escuelas manejan matrícula. Todos los alumnos de un mismo plantel SHALL usar el mismo tipo (no se mezclan ambos dentro de un mismo plantel). Este identificador SHALL ser único dentro del plantel y es el que usan alumno y padre/tutor para identificarse en los flujos de matrícula/correo+PIN (ver `attendance-confirmation` y `student-parent-access`). El sistema puede mantener además un ID interno propio del alumno, pero alumno, padre/tutor y profesor no SHALL necesitar conocerlo ni usarlo.
 

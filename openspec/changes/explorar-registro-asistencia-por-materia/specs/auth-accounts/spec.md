@@ -49,11 +49,15 @@ Profesor y dirección SHALL poder cerrar su sesión de usuario de forma explíci
 - **THEN** el sistema le niega el acceso y lo redirige al formulario de login
 
 ### Requirement: Aprovisionamiento por contraseña temporal
-Al dar de alta a un profesor, dirección SHALL generar una contraseña temporal que se entrega por fuera del sistema. El sistema no SHALL ofrecer un flujo de auto-registro ni de recuperación de contraseña por el propio profesor.
+Al dar de alta a un profesor o a otra cuenta de dirección de su mismo plantel, dirección SHALL generar una contraseña temporal que se entrega por fuera del sistema. El sistema no SHALL ofrecer un flujo de auto-registro ni de recuperación de contraseña por el propio usuario. Cada alta está sujeta al cupo de cuentas por rol del plantel (ver `academic-structure`, "Cupo de cuentas por plantel").
 
 #### Scenario: Alta de un nuevo profesor
 - **WHEN** dirección da de alta a un profesor
 - **THEN** el sistema genera una contraseña temporal que dirección debe entregarle por un medio externo al sistema
+
+#### Scenario: Alta de otra cuenta de dirección
+- **WHEN** una cuenta de dirección da de alta a otra cuenta con rol dirección de su mismo plantel
+- **THEN** el sistema genera una contraseña temporal que se entrega por fuera del sistema, igual que con un profesor
 
 ### Requirement: Bootstrap manual de la primera cuenta de dirección
 La primera cuenta de dirección de un plantel nuevo SHALL crearse mediante un procedimiento operativo manual fuera de la interfaz del sistema, dado que no existe todavía un rol de super-administrador cross-plantel.
@@ -61,6 +65,13 @@ La primera cuenta de dirección de un plantel nuevo SHALL crearse mediante un pr
 #### Scenario: Alta de un plantel nuevo
 - **WHEN** se incorpora un plantel nuevo al sistema
 - **THEN** la primera cuenta de dirección de ese plantel se crea directamente en la base de datos, no a través de un flujo de autoservicio
+
+### Requirement: Restablecimiento de acceso cuando ninguna cuenta de dirección puede autenticarse
+Si todas las cuentas de dirección de un plantel pierden acceso (contraseñas olvidadas, cuentas bloqueadas), el restablecimiento SHALL resolverse mediante el mismo procedimiento operativo manual usado en el bootstrap de la primera cuenta — directamente en base de datos, por quien administra el sistema. No existe todavía un rol de super-administrador cross-plantel con una interfaz dedicada para esto (mismo patrón que "Funcionalidades habilitadas por plantel" en `academic-structure`).
+
+#### Scenario: Plantel sin ninguna cuenta de dirección con acceso
+- **WHEN** ninguna cuenta de dirección de un plantel puede autenticarse
+- **THEN** el restablecimiento de acceso se realiza directamente en base de datos, no vía autoservicio ni un rol dedicado en la interfaz
 
 ### Requirement: Configuración centralizada en archivo de propiedades
 Los valores de tolerancia default, intervalo de rotación del QR e intentos fallidos de PIN permitidos SHALL vivir en un único archivo de propiedades del sistema, no hardcodeados ni dispersos en el código. Las credenciales de usuarios individuales (profesor, dirección) no SHALL vivir en este archivo — viven en base de datos, ligadas al alta dinámica de cada cuenta.
