@@ -1,6 +1,6 @@
 ## Purpose
 
-Define cómo un alumno confirma su propia asistencia al escanear el QR proyectado, incluyendo su identificación, el reconocimiento de su dispositivo y el manejo de reintentos y errores.
+Define cómo un alumno confirma su propia asistencia al escanear el QR proyectado, incluyendo su identificación y el manejo de reintentos y errores.
 
 ## ADDED Requirements
 
@@ -18,6 +18,13 @@ El sistema SHALL identificar al alumno mediante su identificador (matrícula o c
 - **WHEN** el alumno ingresa su identificador y PIN correctos
 - **THEN** el sistema lo identifica y procede a registrar su confirmación
 
+### Requirement: Confirmación visible del resultado del registro
+Tras identificarse correctamente, el sistema SHALL registrar la asistencia del alumno y mostrarle en su propio dispositivo el estado resultante (Presente o Tardanza) antes de que pueda cerrar la vista.
+
+#### Scenario: Alumno ve su estado tras confirmar
+- **WHEN** el alumno se identifica correctamente y el sistema calcula y registra su asistencia
+- **THEN** la vista le muestra su estado resultante (ej. "Registrado: Presente" o "Registrado: Tardanza")
+
 ### Requirement: Bloqueo por intentos fallidos de PIN
 El sistema SHALL bloquear nuevos intentos de identificación de un identificador de alumno tras un número configurable de intentos fallidos consecutivos de PIN (default: 15, en archivo de propiedades).
 
@@ -25,16 +32,16 @@ El sistema SHALL bloquear nuevos intentos de identificación de un identificador
 - **WHEN** un alumno falla su PIN el número de veces configurado
 - **THEN** el sistema bloquea nuevos intentos para ese identificador hasta que el profesor o dirección lo desbloqueen
 
-### Requirement: Reconocimiento ligero de dispositivo
-El sistema SHALL requerir la identificación completa (identificador + PIN) solo la primera vez que un dispositivo confirma asistencia. En confirmaciones subsecuentes desde el mismo dispositivo, SHALL reconocer al alumno sin solicitar el PIN nuevamente.
+### Requirement: Identificación completa en cada confirmación, sin reconocimiento de dispositivo
+El sistema SHALL solicitar identificador y PIN completos en cada confirmación de asistencia, sin excepción por dispositivo ya usado previamente. No SHALL existir un mecanismo de "dispositivo reconocido" que omita el PIN, dado que un dispositivo puede ser compartido entre distintos alumnos (hermanos, tablet prestada, dispositivo familiar) — recordar un dispositivo como "ya identificado" arriesgaría atribuir la asistencia al alumno equivocado.
 
-#### Scenario: Segunda confirmación desde el mismo dispositivo
-- **WHEN** un alumno ya identificado en su tablet escanea un nuevo QR de una materia distinta el mismo día
-- **THEN** el sistema lo reconoce sin pedirle identificador y PIN de nuevo
+#### Scenario: Segunda confirmación el mismo día desde el mismo dispositivo
+- **WHEN** un alumno que ya confirmó una materia escanea el QR de una materia distinta el mismo día, desde el mismo dispositivo
+- **THEN** el sistema le solicita identificador y PIN completos otra vez, igual que en su primera confirmación
 
-#### Scenario: Confirmación desde un dispositivo distinto
-- **WHEN** el alumno intenta confirmar asistencia desde un dispositivo no reconocido previamente
-- **THEN** el sistema solicita identificador y PIN completos
+#### Scenario: Dispositivo compartido entre dos alumnos
+- **WHEN** dos alumnos distintos usan el mismo dispositivo para confirmar asistencia en sesiones de clase distintas
+- **THEN** cada uno debe identificarse con su propio identificador y PIN; el sistema nunca asume que el segundo alumno es el mismo que el primero
 
 ### Requirement: Manejo de QR expirado
 Si el token leído por el alumno ya no está vigente, el sistema SHALL rechazar la confirmación e indicarle que debe volver a escanear el QR actual, sin ofrecer margen de gracia sobre el token vencido.

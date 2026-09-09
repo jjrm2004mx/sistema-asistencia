@@ -52,6 +52,15 @@ Ver `proposal.md` para la motivación completa. Este documento cubre el **cómo*
 
 **Trigger para revisitar**: cuando el cambio manual por DB se vuelva una fricción operativa frecuente (más de un plantel-cliente real pidiendo cambios de funcionalidades con regularidad), construir la UI de super-administrador cross-plantel deja de ser prematuro.
 
+### Identificación del alumno: PIN en cada confirmación, sin reconocimiento de dispositivo
+
+**Decisión**: cada confirmación de asistencia solicita identificador+PIN completos, sin importar si el dispositivo ya confirmó antes. No existe un mecanismo de "dispositivo reconocido" que recuerde al alumno entre escaneos.
+
+**Alternativas consideradas**:
+- **Reconocimiento ligero de dispositivo** (la versión original de este requirement) — descartado: asumía una relación 1 dispositivo : 1 alumno ("su tablet"), pero los dispositivos de los alumnos se comparten en la práctica (hermanos, tablet familiar, una prestada un día). Si el sistema recuerda un dispositivo como "ya identificado", un segundo alumno que lo use heredaría silenciosamente la identidad del primero sin que el sistema se lo pida — atribuyendo la asistencia a la persona equivocada.
+
+**Razonamiento**: el PIN es una fricción baja (4 dígitos derivados de la fecha de nacimiento, ya memorizados) comparado con el riesgo de una mala atribución de asistencia por dispositivo compartido, que es un caso real y frecuente en el contexto de secundaria (no todos los alumnos tienen dispositivo propio). Pedirlo siempre es más simple de implementar y de razonar que diseñar un mecanismo de reconocimiento que distinga correctamente "mismo alumno, mismo dispositivo" de "dispositivo compartido, alumno distinto".
+
 ## Risks / Trade-offs
 
 - **[Riesgo] Provisionar la VM Ampere A1 gratis en OCI puede fallar por "out of capacity" en la región** al momento de crearla (fricción reportada por la comunidad) → **Mitigación**: reintentar la creación de la instancia y/o probar otra availability domain/región si la primera falla; no es un bloqueo definitivo, solo requiere paciencia en el setup inicial.
