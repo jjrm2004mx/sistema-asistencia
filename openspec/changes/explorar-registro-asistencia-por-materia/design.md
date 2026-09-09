@@ -40,17 +40,17 @@ Ver `proposal.md` para la motivación completa. Este documento cubre el **cómo*
 
 **Razonamiento**: evita dos fricciones opuestas — cerrar de golpe sin darle a un alumno la oportunidad de escanear a último momento, y que el profesor tenga que calcular manualmente cuánto esperar antes de cerrar. Al ser cancelable, mantiene la misma filosofía de reversibilidad que ya tiene el cierre/apertura del registro.
 
-### Funcionalidades habilitadas y cupo de cuentas por plantel: control manual, sin UI de super-admin todavía
+### Rol de super-administrador con UI propia (`super-admin-dashboard`)
 
-**Decisión**: cada plantel tiene (a) un conjunto de capabilities habilitadas de forma independiente entre sí (no un plan cerrado tipo Básico/Completo), y (b) un cupo máximo de cuentas de profesor y de dirección, independientes entre sí — dado que el modelo de negocio SaaS cobra por licencia/cuenta, no tendría sentido que dirección pudiera dar de alta cuentas sin límite. Ambos se cambian vía configuración/base de datos directamente por el operador del sistema — no existe (todavía) un rol de super-administrador cross-plantel con interfaz propia para esto. Dirección puede ver qué tiene habilitado y su cupo/consumo de cuentas, pero no puede autohabilitarse funcionalidades ni ampliarse el cupo ella misma.
+**Decisión**: se revierte la decisión original de mantener todo el control cross-plantel (funcionalidades habilitadas, cupo de cuentas, alta de plantel, restablecimiento de acceso de dirección) como procedimiento manual en base de datos. Se construye `super-admin-dashboard`, un tercer rol de login (junto a profesor y dirección) sin plantel asociado, con UI real para: alta de plantel nuevo, funcionalidades habilitadas por plantel, cupo de cuentas por plantel, y restablecimiento de acceso de dirección bloqueada. La única acción que se mantiene manual (sin UI) es la **deshabilitación completa de un plantel** — caso poco frecuente (cancelación de un cliente) frente al resto de la operación.
+
+Consecuencia directa: el bootstrap manual en base de datos deja de repetirse por cada plantel nuevo — se reduce a un evento único en la vida del sistema, la primera cuenta de super-administrador (ver `auth-accounts`). Todo plantel posterior se da de alta desde `super-admin-dashboard`, sin tocar la base de datos.
 
 **Alternativas consideradas**:
-- **Plan cerrado (enum Básico/Completo) en vez de toggles independientes** — descartado: agrupa capabilities en paquetes fijos, más simple de modelar y de vender, pero menos flexible para paquetes a la medida por plantel a futuro.
-- **Construir ya una UI de super-administrador cross-plantel** — descartado por ahora: sin múltiples planteles-cliente reales operando en paralelo, es costo hundido especulativo sin caso de uso real que valide el diseño de esa UI (¿solo toggles de features? ¿también facturación? ¿métricas agregadas?).
+- **Mantener todo manual (decisión original)** — revertida: aunque válida como punto de partida, una vez que el propio proyecto identificó suficientes operaciones recurrentes de este tipo (alta de plantel, cambio de funcionalidades, cupo, reset de acceso), construir la UI dejó de ser prematuro — son acciones que se repiten por cada plantel-cliente nuevo, no un caso aislado.
+- **Login/acceso separado del de profesor/dirección** — descartado: se reutiliza el mismo formulario unificado y el mismo mecanismo de rol (ver `auth-accounts`, "Rol explícito por cuenta y enrutamiento post-login"), evitando construir una superficie de autenticación aparte para un solo rol adicional.
 
-**Razonamiento**: dirección administra su propio plantel, pero no puede ser quien se autohabilite funcionalidades ni se autoasigne cuentas ilimitadas si ambas están atadas a un plan/pricing — es un conflicto de interés obvio. Esa autoridad debe vivir por encima del nivel de plantel. Sin embargo, mientras haya un solo operador (el desarrollador) y pocos planteles, un cambio manual vía DB/config es suficiente y evita construir una herramienta antes de tener un caso de uso real que la valide — el mismo patrón que el bootstrap manual de la primera cuenta de dirección (ver `auth-accounts`).
-
-**Trigger para revisitar**: cuando el cambio manual por DB se vuelva una fricción operativa frecuente (más de un plantel-cliente real pidiendo cambios de funcionalidades con regularidad), construir la UI de super-administrador cross-plantel deja de ser prematuro.
+**Razonamiento**: dirección sigue sin poder autohabilitarse funcionalidades ni ampliarse su propio cupo — ese conflicto de interés no cambia — pero ahora existe una cuenta real (no solo "el desarrollador con acceso a la BD") con una interfaz para ejercer esa autoridad, lo cual es más sostenible en cuanto haya más de un plantel-cliente.
 
 ### Identificación del alumno: PIN en cada confirmación, sin reconocimiento de dispositivo
 

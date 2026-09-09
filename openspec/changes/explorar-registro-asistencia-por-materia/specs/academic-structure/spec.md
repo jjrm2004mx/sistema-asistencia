@@ -12,7 +12,7 @@ El sistema SHALL soportar múltiples planteles, cada uno con sus propios profeso
 - **THEN** los datos de profesores, materias, grupos y alumnos de un plantel no son visibles ni accesibles desde el otro plantel
 
 ### Requirement: Funcionalidades habilitadas por plantel
-Cada plantel SHALL tener un conjunto de capabilities habilitadas de forma independiente entre sí (no un plan cerrado tipo Básico/Completo), determinando qué funcionalidades del sistema están disponibles para ese plantel. Dirección SHALL poder ver qué funcionalidades tiene habilitadas su plantel, pero no SHALL tener ningún mecanismo en la interfaz para habilitarlas o deshabilitarlas ella misma — ese cambio requiere una autoridad por encima del nivel de plantel (ver `auth-accounts`, rol de super-administrador cross-plantel).
+Cada plantel SHALL tener un conjunto de capabilities habilitadas de forma independiente entre sí (no un plan cerrado tipo Básico/Completo), determinando qué funcionalidades del sistema están disponibles para ese plantel. Dirección SHALL poder ver qué funcionalidades tiene habilitadas su plantel, pero no SHALL tener ningún mecanismo en la interfaz para habilitarlas o deshabilitarlas ella misma — ese cambio se hace desde `super-admin-dashboard`.
 
 #### Scenario: Plantel con funcionalidad deshabilitada
 - **WHEN** una capability está deshabilitada para un plantel
@@ -23,11 +23,11 @@ Cada plantel SHALL tener un conjunto de capabilities habilitadas de forma indepe
 - **THEN** el sistema no ofrece ninguna acción para hacerlo; solo puede ver cuáles tiene habilitadas
 
 #### Scenario: Cambio de funcionalidades habilitadas
-- **WHEN** se requiere habilitar o deshabilitar una funcionalidad para un plantel
-- **THEN** el cambio SHALL hacerse mediante un procedimiento operativo manual (configuración/base de datos) fuera de la interfaz del sistema, dado que no existe todavía un rol de super-administrador cross-plantel con una interfaz dedicada para esto
+- **WHEN** el super-administrador habilita o deshabilita una funcionalidad para un plantel desde `super-admin-dashboard`
+- **THEN** el cambio aplica de inmediato a todas las cuentas de ese plantel
 
 ### Requirement: Cupo de cuentas por plantel
-Cada plantel SHALL tener un cupo máximo de cuentas de profesor y un cupo máximo de cuentas de dirección, independientes entre sí, fijados por el operador del sistema mediante el mismo procedimiento manual (configuración/base de datos) que las funcionalidades habilitadas — ver "Funcionalidades habilitadas por plantel" arriba — dado que el modelo de negocio SaaS cobra por licencia/cuenta. Dirección SHALL poder ver su cupo y cuántas cuentas tiene en uso por rol, pero no SHALL tener ningún mecanismo en la interfaz para aumentarlo ella misma.
+Cada plantel SHALL tener un cupo máximo de cuentas de profesor y un cupo máximo de cuentas de dirección, independientes entre sí, fijados por el super-administrador desde `super-admin-dashboard` — dado que el modelo de negocio SaaS cobra por licencia/cuenta. Dirección SHALL poder ver su cupo y cuántas cuentas tiene en uso por rol, pero no SHALL tener ningún mecanismo en la interfaz para aumentarlo ella misma.
 
 #### Scenario: Alta dentro del cupo
 - **WHEN** dirección da de alta a un profesor o a otra cuenta de dirección y el plantel no ha alcanzado su cupo para ese rol
@@ -37,9 +37,9 @@ Cada plantel SHALL tener un cupo máximo de cuentas de profesor y un cupo máxim
 - **WHEN** dirección intenta dar de alta una cuenta de un rol (profesor o dirección) cuyo cupo ya está al máximo
 - **THEN** el sistema rechaza el alta e indica que se alcanzó el cupo de licencias para ese rol
 
-#### Scenario: Ampliar el cupo es manual
-- **WHEN** se requiere aumentar el cupo de cuentas de un plantel (ej. tras renovar o ampliar su licencia)
-- **THEN** el cambio SHALL hacerse mediante el mismo procedimiento operativo manual usado para las funcionalidades habilitadas, no vía autoservicio
+#### Scenario: Ampliar el cupo desde super-admin-dashboard
+- **WHEN** el super-administrador aumenta el cupo de cuentas de un plantel (ej. tras renovar o ampliar su licencia)
+- **THEN** dirección de ese plantel puede dar de alta cuentas de ese rol hasta el nuevo máximo
 
 ### Requirement: Tipo de identificador de alumno configurable por plantel
 Dirección SHALL configurar, desde su tablero y como parte del setup inicial de su plantel, un único tipo de identificador para sus alumnos — **matrícula** o **correo institucional** — dado que no todas las escuelas manejan matrícula. Todos los alumnos de un mismo plantel SHALL usar el mismo tipo (no se mezclan ambos dentro de un mismo plantel). Este identificador SHALL ser único dentro del plantel y es el que usan alumno y padre/tutor para identificarse en los flujos de matrícula/correo+PIN (ver `attendance-confirmation` y `student-parent-access`). El sistema puede mantener además un ID interno propio del alumno, pero alumno, padre/tutor y profesor no SHALL necesitar conocerlo ni usarlo.

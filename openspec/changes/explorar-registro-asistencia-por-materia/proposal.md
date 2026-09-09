@@ -12,7 +12,8 @@ Los planteles de secundaria hoy toman asistencia de forma manual y una sola vez 
 - Introduce la **justificación de faltas** por el profesor (solo faltas, granularidad por materia/sesión de clase, evidencia opcional), con catálogo de motivos por plantel sujeto a aprobación de dirección (motivo nuevo se usa de inmediato y queda pendiente de aprobar para reutilización futura).
 - Introduce los **tableros de profesor y dirección**: navegación por calendario (mes/semana/día) unificada con la operación diaria, y resúmenes operativos (asistencia por grupo, ranking de faltas, rachas, justificantes, sesiones de clase pendientes) calculados sobre el periodo visible.
 - Introduce el **acceso de solo lectura para alumno y padre** a su historial de asistencia (matrícula + PIN, acotado al mes en curso, transparencia total de campos, sin capacidad de justificar).
-- Introduce **login tradicional** (usuario/contraseña, credenciales en base de datos) para profesor y dirección, con alta dinámica de profesores por dirección y aprovisionamiento por contraseña temporal.
+- Introduce **login tradicional** (usuario/contraseña, credenciales en base de datos) para profesor, dirección y super-administrador, con alta dinámica de profesores/dirección/super-administrador y aprovisionamiento por contraseña temporal.
+- Introduce el **tablero de super-administrador**: la única cuenta cross-plantel del sistema — da de alta planteles nuevos, gestiona funcionalidades habilitadas y cupo de cuentas por plantel, y restablece el acceso de un plantel sin dirección funcional. Reemplaza la mayoría de lo que antes era un procedimiento manual en base de datos; la deshabilitación completa de un plantel se mantiene manual por ahora.
 
 ## Capabilities
 
@@ -24,7 +25,8 @@ Los planteles de secundaria hoy toman asistencia de forma manual y una sola vez 
 - `teacher-dashboard`: tablero del profesor — navegación por calendario, roster en vivo, marcado manual, resúmenes.
 - `admin-dashboard`: tablero de dirección — alta del catálogo base (materias/profesores/grupos/alumnos), resúmenes a nivel plantel, aprobación del catálogo de justificantes, reset de contraseñas y de PIN.
 - `student-parent-access`: acceso y consulta de historial de asistencia para alumno y padre/tutor.
-- `auth-accounts`: autenticación y aprovisionamiento de cuentas — login tradicional de profesor/dirección con credenciales en base de datos, acceso sin login tradicional de alumno/padre, bootstrap manual de la primera cuenta de dirección por plantel.
+- `auth-accounts`: autenticación y aprovisionamiento de cuentas — login tradicional de profesor/dirección/super-administrador con credenciales en base de datos, acceso sin login tradicional de alumno/padre, bootstrap manual de la primera cuenta de super-administrador (una sola vez en la vida del sistema).
+- `super-admin-dashboard`: tablero del super-administrador — alta de plantel nuevo, funcionalidades habilitadas y cupo de cuentas por plantel, restablecimiento de acceso de dirección bloqueada, deshabilitación completa de un plantel (manual).
 
 ### Modified Capabilities
 (N/A — proyecto nuevo, sin specs existentes.)
@@ -33,4 +35,4 @@ Los planteles de secundaria hoy toman asistencia de forma manual y una sola vez 
 
 - Proyecto **nuevo e independiente**: no reutiliza infraestructura de `notification-service` ni `ticket-management` (aunque puede inspirarse en sus patrones de eventos/notificación desacoplada sin acoplarse a ellos).
 - Repositorio actualmente vacío de código — este cambio es la base fundacional; el stack técnico, esquema de base de datos y mecanismo de tiempo real quedan pendientes de definir en `design.md`.
-- Alcance deliberadamente amplio en capacidades (8), pero se espera una implementación **por fases**: un núcleo mínimo de uso diario (sesión de clase, QR, confirmación, marcado manual, cierre) antes que las capacidades de valor agregado (tableros, resúmenes, catálogo con aprobación) — el secuenciamiento exacto se define en `tasks.md`.
+- Alcance deliberadamente amplio en capacidades (9), pero se espera una implementación **por fases**: un núcleo mínimo de uso diario (sesión de clase, QR, confirmación, marcado manual, cierre) antes que las capacidades de valor agregado (tableros, resúmenes, catálogo con aprobación, super-admin) — el secuenciamiento exacto se define en `tasks.md`.
