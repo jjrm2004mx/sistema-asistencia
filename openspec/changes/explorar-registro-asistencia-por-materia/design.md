@@ -32,7 +32,11 @@ Ver `proposal.md` para la motivación completa. Este documento cubre el **cómo*
 
 **Razonamiento**: ningún flujo del sistema necesita que el cliente empuje datos en tiempo real de vuelta por el mismo canal — confirmación de asistencia, marcado manual, cierre/apertura y justificación son todas acciones puntuales vía REST. SSE cubre el 100% de la necesidad (contador, roster, countdown) con menos código, reconexión automática nativa del navegador, y sin upgrade de protocolo (menor fricción con la red del plantel).
 
-**Alcance de la difusión SSE**: el mismo stream de eventos de una sesión de clase alimenta tanto la vista pública (proyector) como el tablero privado del profesor — la diferencia entre ambas vistas es de **presentación** (qué campos se renderizan), no de canal. Ver `attendance-session` y `teacher-dashboard` specs para el detalle de qué expone cada vista (ej. la vista pública nunca expone nombres de alumnos, ver spec).
+**Alcance de la difusión SSE — corregido**: la formulación original de esta decisión decía que la vista pública y el tablero privado se alimentan del "mismo stream" y que la diferencia es solo de presentación en el cliente. Eso es impreciso y, tal cual estaba escrito, inseguro: si el payload de un solo canal incluyera nombres de alumnos y el cliente público simplemente los ocultara al renderizar, cualquiera con las herramientas de desarrollador del navegador vería los nombres en el stream crudo — violaría directamente el requirement de `attendance-session` de que la vista pública "nunca expone nombres de alumnos". La decisión correcta es **dos endpoints SSE distintos**, alimentados por el mismo evento interno de dominio pero serializados distinto en el servidor:
+- `GET /api/sesiones-clase/{id}/eventos/publico` — sin autenticación, el payload nunca incluye nombres de alumnos, solo el conteo agregado y el estado de la cuenta regresiva de cierre.
+- `GET /api/sesiones-clase/{id}/eventos/profesor` — requiere sesión autenticada (ver "Mecanismo de sesión" abajo) del profesor de esa asignación o de dirección de ese plantel; el payload incluye el roster completo con nombres.
+
+Ver `attendance-session` y `teacher-dashboard` specs para el detalle de qué expone cada vista.
 
 ### Cierre del registro: cuenta regresiva cancelable
 
@@ -70,6 +74,17 @@ Consecuencia directa: el bootstrap manual en base de datos deja de repetirse por
 - **Otro framework (Node/Express, Django, etc.)** — descartado: las decisiones de hosting y de tiempo real ya asumen JVM; reabrir el framework reabriría también esas decisiones sin una razón nueva que lo justifique.
 
 **Razonamiento**: formaliza la decisión implícita en vez de dejarla flotando como una suposición no declarada — sin alternativas nuevas que cambien el cálculo ya hecho en las decisiones de hosting y SSE.
+
+### Mecanismo de sesión: HttpSession stateful para login tradicional, sesión corta para alumno/padre
+
+**Decisión**:
+- **Profesor/dirección/super-administrador**: sesión stateful vía `HttpSession` de Spring Security (cookie `HttpOnly` + `Secure`), en memoria en la propia instancia — dado que ya decidimos una sola VM / una sola instancia, no hace falta un store distribuido (Redis) para compartir sesión entre réplicas que no existen. El logout invalida la sesión en el servidor de inmediato, cumpliendo el requirement ya escrito en `auth-accounts` ("revoca el acceso... hasta que vuelva a autenticarse") sin necesidad de una blocklist de tokens.
+- **Alumno/padre**: al identificarse (identificador+PIN) en `student-parent-access`, el sistema abre una sesión corta y de bajo privilegio para navegar su historial del mes sin repetir el PIN en cada clic. Esta sesión corta **no aplica a `attendance-confirmation`** — ahí ya decidimos pedir identificador+PIN completos en cada confirmación de asistencia, sin excepción (ver "Identificación del alumno: PIN en cada confirmación, sin reconocimiento de dispositivo" arriba); una sesión de conveniencia ahí reabriría el mismo riesgo de dispositivo compartido que esa decisión evitó.
+
+**Alternativas consideradas**:
+- **JWT sin estado** — no descartado de forma permanente, dejado como puerta abierta: si el sistema eventualmente necesita más de una instancia del backend (más allá del alcance actual de una sola VM), JWT evita depender de sesión en memoria de una sola instancia. Por ahora, con una sola instancia, "logout inmediato" con JWT normalmente requeriría igual una blocklist de tokens revocados del lado servidor — reintroduce el mismo estado que se supone que JWT evita, sin ganar nada a cambio en el escenario actual.
+
+**Razonamiento**: la decisión de sesión sigue la misma lógica que las demás decisiones de esta fase — resolver con lo más simple que satisface los requirements ya escritos, dado el contexto ya fijado (una VM, un operador), dejando explícito el trigger para reconsiderar (pasar a más de una instancia) en vez de sobre-diseñar para una escala que no existe todavía.
 
 ### Frontend: SPA con React, servida como recurso estático del propio backend
 
