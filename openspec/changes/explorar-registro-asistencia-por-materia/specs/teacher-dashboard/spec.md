@@ -36,6 +36,17 @@ Si el profesor marca manualmente a un alumno que ya tiene un registro por auto-c
 - **WHEN** el profesor marca manualmente a un alumno que ya escaneó el QR, con un estado distinto al registrado
 - **THEN** el sistema muestra una advertencia antes de confirmar el cambio
 
+### Requirement: Desbloqueo de identificador de alumno bloqueado
+El profesor SHALL poder ver, dentro de su roster, qué alumnos de sus propias asignaciones tienen su identificador bloqueado por intentos fallidos de PIN (ver `attendance-confirmation`), y desbloquearlo seleccionándolo de una lista — la misma acción que dirección tiene disponible en `admin-dashboard`, pero acotada a los alumnos que el profesor atiende.
+
+#### Scenario: Alumno bloqueado visible en el roster
+- **WHEN** un alumno de una sesión de clase del profesor tiene su identificador bloqueado
+- **THEN** el roster del profesor lo muestra con un estatus "Bloqueado"
+
+#### Scenario: Profesor desbloquea a un alumno
+- **WHEN** el profesor selecciona a un alumno bloqueado y confirma el desbloqueo
+- **THEN** el sistema le permite al alumno volver a intentar su identificación
+
 ### Requirement: Resumen de cierre con alumnos sin registrar
 Al cerrarse el registro de una sesión de clase (manual o por cuenta regresiva vencida), el tablero del profesor SHALL mostrar un resumen con el conteo de confirmados y la lista nominal de los alumnos inscritos que no registraron asistencia. Esta lista SHALL ser visible únicamente en el tablero privado del profesor, nunca en la vista pública proyectada.
 
