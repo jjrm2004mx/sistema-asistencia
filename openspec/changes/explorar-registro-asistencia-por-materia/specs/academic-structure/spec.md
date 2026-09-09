@@ -27,7 +27,9 @@ Cada plantel SHALL tener un conjunto de capabilities habilitadas de forma indepe
 - **THEN** el cambio SHALL hacerse mediante un procedimiento operativo manual (configuración/base de datos) fuera de la interfaz del sistema, dado que no existe todavía un rol de super-administrador cross-plantel con una interfaz dedicada para esto
 
 ### Requirement: Tipo de identificador de alumno configurable por plantel
-Cada plantel SHALL configurar un único tipo de identificador para sus alumnos — **matrícula** o **correo institucional** — dado que no todas las escuelas manejan matrícula. Todos los alumnos de un mismo plantel SHALL usar el mismo tipo (no se mezclan ambos dentro de un mismo plantel). Este identificador SHALL ser único dentro del plantel y es el que usan alumno y padre/tutor para identificarse en los flujos de matrícula/correo+PIN (ver `attendance-confirmation` y `student-parent-access`). El sistema puede mantener además un ID interno propio del alumno, pero alumno, padre/tutor y profesor no SHALL necesitar conocerlo ni usarlo.
+Dirección SHALL configurar, desde su tablero y como parte del setup inicial de su plantel, un único tipo de identificador para sus alumnos — **matrícula** o **correo institucional** — dado que no todas las escuelas manejan matrícula. Todos los alumnos de un mismo plantel SHALL usar el mismo tipo (no se mezclan ambos dentro de un mismo plantel). Este identificador SHALL ser único dentro del plantel y es el que usan alumno y padre/tutor para identificarse en los flujos de matrícula/correo+PIN (ver `attendance-confirmation` y `student-parent-access`). El sistema puede mantener además un ID interno propio del alumno, pero alumno, padre/tutor y profesor no SHALL necesitar conocerlo ni usarlo.
+
+Una vez que el plantel tiene al menos un alumno dado de alta, el tipo de identificador configurado SHALL quedar bloqueado — el sistema no SHALL permitir cambiarlo, para evitar inconsistencias con alumnos ya identificados bajo el tipo anterior.
 
 #### Scenario: Plantel configurado con matrícula
 - **WHEN** un plantel tiene configurado el tipo de identificador "matrícula"
@@ -40,6 +42,14 @@ Cada plantel SHALL configurar un único tipo de identificador para sus alumnos �
 #### Scenario: Identificador duplicado dentro del plantel
 - **WHEN** se intenta dar de alta un alumno cuyo identificador (matrícula o correo institucional, según lo configurado) ya existe en ese plantel
 - **THEN** el sistema rechaza el alta
+
+#### Scenario: Configuración libre antes del primer alumno
+- **WHEN** el plantel todavía no tiene ningún alumno dado de alta
+- **THEN** dirección puede configurar o cambiar libremente el tipo de identificador desde su tablero
+
+#### Scenario: Tipo de identificador bloqueado tras el primer alumno
+- **WHEN** el plantel ya tiene al menos un alumno dado de alta y dirección intenta cambiar el tipo de identificador
+- **THEN** el sistema rechaza el cambio
 
 ### Requirement: Alta de catálogo base por dirección
 Dirección/Admin de plantel SHALL poder dar de alta materias, profesores, grupos y alumnos de su plantel, de forma individual o mediante importación por CSV.
