@@ -11,6 +11,21 @@ El sistema SHALL soportar múltiples planteles, cada uno con sus propios profeso
 - **WHEN** existen dos planteles distintos en el sistema
 - **THEN** los datos de profesores, materias, grupos y alumnos de un plantel no son visibles ni accesibles desde el otro plantel
 
+### Requirement: Funcionalidades habilitadas por plantel
+Cada plantel SHALL tener un conjunto de capabilities habilitadas de forma independiente entre sí (no un plan cerrado tipo Básico/Completo), determinando qué funcionalidades del sistema están disponibles para ese plantel. Dirección SHALL poder ver qué funcionalidades tiene habilitadas su plantel, pero no SHALL tener ningún mecanismo en la interfaz para habilitarlas o deshabilitarlas ella misma — ese cambio requiere una autoridad por encima del nivel de plantel (ver `auth-accounts`, rol de super-administrador cross-plantel).
+
+#### Scenario: Plantel con funcionalidad deshabilitada
+- **WHEN** una capability está deshabilitada para un plantel
+- **THEN** el sistema oculta o bloquea el acceso a esa funcionalidad para todas las cuentas de ese plantel (profesor y dirección)
+
+#### Scenario: Dirección no puede autohabilitarse funcionalidades
+- **WHEN** dirección busca en su tablero un mecanismo para habilitar una funcionalidad no disponible en su plantel
+- **THEN** el sistema no ofrece ninguna acción para hacerlo; solo puede ver cuáles tiene habilitadas
+
+#### Scenario: Cambio de funcionalidades habilitadas
+- **WHEN** se requiere habilitar o deshabilitar una funcionalidad para un plantel
+- **THEN** el cambio SHALL hacerse mediante un procedimiento operativo manual (configuración/base de datos) fuera de la interfaz del sistema, dado que no existe todavía un rol de super-administrador cross-plantel con una interfaz dedicada para esto
+
 ### Requirement: Tipo de identificador de alumno configurable por plantel
 Cada plantel SHALL configurar un único tipo de identificador para sus alumnos — **matrícula** o **correo institucional** — dado que no todas las escuelas manejan matrícula. Todos los alumnos de un mismo plantel SHALL usar el mismo tipo (no se mezclan ambos dentro de un mismo plantel). Este identificador SHALL ser único dentro del plantel y es el que usan alumno y padre/tutor para identificarse en los flujos de matrícula/correo+PIN (ver `attendance-confirmation` y `student-parent-access`). El sistema puede mantener además un ID interno propio del alumno, pero alumno, padre/tutor y profesor no SHALL necesitar conocerlo ni usarlo.
 

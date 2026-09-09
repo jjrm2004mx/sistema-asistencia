@@ -40,6 +40,18 @@ Ver `proposal.md` para la motivación completa. Este documento cubre el **cómo*
 
 **Razonamiento**: evita dos fricciones opuestas — cerrar de golpe sin darle a un alumno la oportunidad de escanear a último momento, y que el profesor tenga que calcular manualmente cuánto esperar antes de cerrar. Al ser cancelable, mantiene la misma filosofía de reversibilidad que ya tiene el cierre/apertura del registro.
 
+### Funcionalidades habilitadas por plantel: toggles por capability, sin UI de super-admin todavía
+
+**Decisión**: cada plantel tiene un conjunto de capabilities habilitadas de forma independiente entre sí (no un plan cerrado tipo Básico/Completo). El cambio de qué está habilitado para un plantel se hace vía configuración/base de datos directamente por el operador del sistema — no existe (todavía) un rol de super-administrador cross-plantel con interfaz propia para esto. Dirección puede ver qué tiene habilitado su plantel, pero no puede autohabilitarse nada.
+
+**Alternativas consideradas**:
+- **Plan cerrado (enum Básico/Completo) en vez de toggles independientes** — descartado: agrupa capabilities en paquetes fijos, más simple de modelar y de vender, pero menos flexible para paquetes a la medida por plantel a futuro.
+- **Construir ya una UI de super-administrador cross-plantel** — descartado por ahora: sin múltiples planteles-cliente reales operando en paralelo, es costo hundido especulativo sin caso de uso real que valide el diseño de esa UI (¿solo toggles de features? ¿también facturación? ¿métricas agregadas?).
+
+**Razonamiento**: dirección administra su propio plantel, pero no puede ser quien se autohabilite funcionalidades si estas están atadas a un plan/pricing — es un conflicto de interés obvio. Esa autoridad debe vivir por encima del nivel de plantel. Sin embargo, mientras haya un solo operador (el desarrollador) y pocos planteles, un cambio manual vía DB/config es suficiente y evita construir una herramienta antes de tener un caso de uso real que la valide — el mismo patrón que el bootstrap manual de la primera cuenta de dirección (ver `auth-accounts`).
+
+**Trigger para revisitar**: cuando el cambio manual por DB se vuelva una fricción operativa frecuente (más de un plantel-cliente real pidiendo cambios de funcionalidades con regularidad), construir la UI de super-administrador cross-plantel deja de ser prematuro.
+
 ## Risks / Trade-offs
 
 - **[Riesgo] Provisionar la VM Ampere A1 gratis en OCI puede fallar por "out of capacity" en la región** al momento de crearla (fricción reportada por la comunidad) → **Mitigación**: reintentar la creación de la instancia y/o probar otra availability domain/región si la primera falla; no es un bloqueo definitivo, solo requiere paciencia en el setup inicial.
