@@ -130,6 +130,27 @@ com.sistemaasistencia
 
 **Razonamiento**: por capability calca 1:1 la estructura de `specs/`, así que localizar código para un requirement es directo. Dentro de cada capability, Controller→Service→Repository es la capa de aplicación normal, no ceremonia extra. El aislamiento de dominio (`domain/`) se reserva para `attendance_session`, la única capability con lógica de estado real (máquina de estados de la sesión, rotación de QR, cálculo de tolerancia) que vale la pena proteger de anotaciones de Spring/JPA — el resto no lo necesita.
 
+### Estructura de la API: REST + SSE por capability
+
+**Decisión**: API REST convencional bajo `/api`, recursos en plural y kebab-case (independiente de que los paquetes Java usen snake_case), JSON como formato, autenticación por cookie de sesión (ver "Mecanismo de sesión" abajo, no header `Authorization`). Los dos endpoints SSE (público/privado) ya decididos arriba son la única excepción al patrón request/response normal.
+
+**Endpoints principales por capability** (no exhaustivo — cubre los casos de uso ya spec'd, el resto se completa al implementar):
+
+- **`auth_accounts`**: `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me` (cuenta actual: rol, plantel, nombre — para restaurar sesión al recargar el frontend).
+- **`academic_structure`**: `GET|POST /api/materias`, `GET|POST /api/grupos`, `GET|POST /api/alumnos`, `POST /api/alumnos/import-csv`, `GET|POST /api/asignaciones`, `GET|PUT /api/plantel/configuracion` (tipo de identificador, bloqueado tras el primer alumno), `PATCH /api/alumnos/{id}/desbloquear`.
+- **`attendance_session`**: `POST /api/sesiones-clase` (iniciar), `GET /api/sesiones-clase/{id}`, `POST /api/sesiones-clase/{id}/cerrar`, `POST /api/sesiones-clase/{id}/cancelar-cierre`, `POST /api/sesiones-clase/{id}/reabrir`, `PATCH /api/sesiones-clase/{id}/registros/{alumnoId}` (marcado manual), `GET /api/sesiones-clase/{id}/eventos/publico` (SSE), `GET /api/sesiones-clase/{id}/eventos/profesor` (SSE, autenticado).
+- **`attendance_confirmation`**: `POST /api/confirmaciones` (identificador+PIN+token QR — endpoint público, sin sesión, sujeto al bloqueo por intentos fallidos).
+- **`attendance_justification`**: `POST /api/registros-asistencia/{id}/justificar`, `GET /api/motivos-justificacion`.
+- **`teacher_dashboard`**: `GET /api/tablero-profesor/sesiones?fecha=`, `GET /api/tablero-profesor/resumenes?mes=`.
+- **`admin_dashboard`**: `GET /api/tablero-direccion/resumenes?mes=`, `PATCH /api/motivos-justificacion/{id}/aprobar`, `DELETE /api/motivos-justificacion/{id}`, `POST /api/cuentas/{id}/reset-password`.
+- **`student_parent_access`**: `POST /api/consulta-historial` (identificador+PIN, abre la sesión corta), `GET /api/consulta-historial/mes-actual`.
+- **`super_admin_dashboard`**: `POST /api/planteles` (alta de plantel nuevo), `PATCH /api/planteles/{id}/funcionalidades`, `PATCH /api/planteles/{id}/cupo-cuentas`, `POST /api/planteles/{id}/restablecer-acceso-direccion`, `POST /api/cuentas` (alta de otra cuenta super-admin).
+
+**Alternativas consideradas**:
+- **GraphQL** — descartado: da flexibilidad de consulta que ningún requirement pide (los tableros tienen resúmenes fijos, no consultas ad-hoc del cliente), y agrega una pieza más (resolvers, schema) sin necesidad — mismo criterio que descartó WebSocket y Nginx aparte en decisiones previas.
+
+**Razonamiento**: REST + los dos SSE ya decididos cubren el 100% de los flujos spec'd sin agregar protocolo nuevo. Los nombres de recurso siguen el vocabulario de los specs (`sesiones-clase`, no `sessions`) para que la API se lea igual que los requirements que implementa.
+
 ### Mecanismo de sesión: HttpSession stateful para login tradicional, sesión corta para alumno/padre
 
 **Decisión**:
