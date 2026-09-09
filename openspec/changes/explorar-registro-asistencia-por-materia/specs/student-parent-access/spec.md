@@ -16,7 +16,7 @@ El sistema SHALL mostrar el historial de asistencia del alumno acotado al mes en
 
 #### Scenario: Consulta del historial
 - **WHEN** un alumno o padre se identifica correctamente
-- **THEN** ve el detalle completo de cada sesión del mes en curso, incluyendo estado, hora, motivo (si está justificada) y origen del registro
+- **THEN** ve el detalle completo de cada sesión de clase del mes en curso, incluyendo estado, hora, motivo (si está justificada) y origen del registro
 
 ### Requirement: Alcance de "lo propio"
 Un alumno SHALL ver únicamente su propio historial. Un padre/tutor SHALL ver únicamente el historial del hijo/a cuyo identificador y PIN ingresó, repitiendo el flujo de identificación por cada hijo/a distinto.

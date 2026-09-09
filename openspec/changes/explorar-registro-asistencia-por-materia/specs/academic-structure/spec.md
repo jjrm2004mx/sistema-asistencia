@@ -57,20 +57,20 @@ Un alumno SHALL estar inscrito a uno o más grupos, y esa inscripción determina
 
 #### Scenario: Alumno inscrito ve sus materias
 - **WHEN** un alumno está inscrito en un grupo
-- **THEN** puede confirmar asistencia únicamente en las sesiones de las materias asignadas a ese grupo
+- **THEN** puede confirmar asistencia únicamente en las sesiones de clase de las materias asignadas a ese grupo
 
 ### Requirement: Asignación de profesor a materia y grupo
 Dirección SHALL poder crear una asignación que vincule un profesor, una materia y un grupo. Un profesor puede tener múltiples asignaciones y una materia puede tener múltiples profesores.
 
 #### Scenario: Profesor con varias materias
 - **WHEN** un profesor tiene asignaciones a dos materias distintas
-- **THEN** puede iniciar sesiones de asistencia para ambas
+- **THEN** puede iniciar sesiones de clase para ambas
 
 ### Requirement: Horario informativo, no restrictivo
-Cada asignación SHALL poder tener un horario (día de la semana y hora) que sirve como referencia, sin restringir cuándo el profesor puede abrir una sesión.
+Cada asignación SHALL poder tener un horario (día de la semana y hora) que sirve como referencia, sin restringir cuándo el profesor puede abrir una sesión de clase.
 
-#### Scenario: Profesor abre sesión fuera de horario
-- **WHEN** un profesor con una asignación abre una sesión de asistencia en un horario distinto al registrado
+#### Scenario: Profesor abre sesión de clase fuera de horario
+- **WHEN** un profesor con una asignación abre una sesión de clase en un horario distinto al registrado
 - **THEN** el sistema permite la acción sin bloquearla
 
 ### Requirement: Materias siempre ligadas a un grupo fijo

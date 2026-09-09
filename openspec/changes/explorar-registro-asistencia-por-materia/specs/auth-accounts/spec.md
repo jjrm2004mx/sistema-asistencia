@@ -41,4 +41,4 @@ Los valores de tolerancia default, intervalo de rotación del QR e intentos fall
 
 #### Scenario: Cambio de un valor de configuración
 - **WHEN** se actualiza el valor de tolerancia default en el archivo de propiedades
-- **THEN** el nuevo valor aplica a las sesiones futuras sin requerir cambios en el código
+- **THEN** el nuevo valor aplica a las sesiones de clase futuras sin requerir cambios en el código

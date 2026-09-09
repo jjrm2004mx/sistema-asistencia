@@ -5,11 +5,11 @@ Define cómo un alumno confirma su propia asistencia al escanear el QR proyectad
 ## ADDED Requirements
 
 ### Requirement: Confirmación vía escaneo de QR
-El alumno SHALL confirmar su asistencia escaneando el QR proyectado con la cámara de su dispositivo, lo cual abre una vista web asociada al contexto de esa sesión.
+El alumno SHALL confirmar su asistencia escaneando el QR proyectado con la cámara de su dispositivo, lo cual abre una vista web asociada al contexto de esa sesión de clase.
 
 #### Scenario: Escaneo abre la confirmación
 - **WHEN** un alumno escanea el QR proyectado
-- **THEN** el sistema abre una página web asociada a esa sesión y al token vigente en ese momento
+- **THEN** el sistema abre una página web asociada a esa sesión de clase y al token vigente en ese momento
 
 ### Requirement: Identificación por identificador de alumno y PIN
 El sistema SHALL identificar al alumno mediante su identificador (matrícula o correo institucional, según el tipo configurado por su plantel — ver `academic-structure`) y un PIN (su fecha de nacimiento en formato ddmmaaaa), sin requerir un flujo de usuario/contraseña tradicional.
@@ -44,10 +44,10 @@ Si el token leído por el alumno ya no está vigente, el sistema SHALL rechazar 
 - **THEN** el sistema rechaza la solicitud y le indica que escanee el código vigente
 
 ### Requirement: Re-captura y doble escaneo
-Si el alumno ya tiene un registro de asistencia para la sesión, el sistema SHALL informarle su estado actual y, si decide volver a capturar, SHALL advertirle que esto sustituye el registro anterior antes de aplicar el cambio — salvo que el nuevo estado calculado sea idéntico al existente, en cuyo caso SHALL mostrar un mensaje neutro sin advertencia.
+Si el alumno ya tiene un registro de asistencia para la sesión de clase, el sistema SHALL informarle su estado actual y, si decide volver a capturar, SHALL advertirle que esto sustituye el registro anterior antes de aplicar el cambio — salvo que el nuevo estado calculado sea idéntico al existente, en cuyo caso SHALL mostrar un mensaje neutro sin advertencia.
 
 #### Scenario: Reconfirmación sin cambio de estado
-- **WHEN** un alumno ya registrado como Presente vuelve a escanear el QR dentro de la misma sesión y el nuevo cálculo también resulta en Presente
+- **WHEN** un alumno ya registrado como Presente vuelve a escanear el QR dentro de la misma sesión de clase y el nuevo cálculo también resulta en Presente
 - **THEN** el sistema le informa que ya está registrado, sin mostrar una advertencia de sustitución
 
 #### Scenario: Reconfirmación con cambio de estado
@@ -55,8 +55,8 @@ Si el alumno ya tiene un registro de asistencia para la sesión, el sistema SHAL
 - **THEN** el sistema le advierte que esto sustituirá su registro anterior antes de aplicar el cambio
 
 ### Requirement: Escaneo fuera de la materia-grupo inscrita
-El sistema SHALL validar en el backend que el alumno esté inscrito en la materia-grupo de la sesión escaneada como salvaguarda de integridad de datos, aunque no requiere una experiencia de usuario dedicada para este caso (los alumnos están físicamente supervisados por el profesor en su salón).
+El sistema SHALL validar en el backend que el alumno esté inscrito en la materia-grupo de la sesión de clase escaneada como salvaguarda de integridad de datos, aunque no requiere una experiencia de usuario dedicada para este caso (los alumnos están físicamente supervisados por el profesor en su salón).
 
 #### Scenario: Validación de inscripción en backend
-- **WHEN** una solicitud de confirmación llega para un alumno no inscrito en la materia-grupo de la sesión
+- **WHEN** una solicitud de confirmación llega para un alumno no inscrito en la materia-grupo de la sesión de clase
 - **THEN** el sistema rechaza el registro
