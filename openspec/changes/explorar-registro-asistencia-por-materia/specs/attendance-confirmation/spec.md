@@ -11,30 +11,30 @@ El alumno SHALL confirmar su asistencia escaneando el QR proyectado con la cáma
 - **WHEN** un alumno escanea el QR proyectado
 - **THEN** el sistema abre una página web asociada a esa sesión y al token vigente en ese momento
 
-### Requirement: Identificación por matrícula y PIN
-El sistema SHALL identificar al alumno mediante su matrícula y un PIN (su fecha de nacimiento en formato ddmmaaaa), sin requerir un flujo de usuario/contraseña tradicional.
+### Requirement: Identificación por identificador de alumno y PIN
+El sistema SHALL identificar al alumno mediante su identificador (matrícula o correo institucional, según el tipo configurado por su plantel — ver `academic-structure`) y un PIN (su fecha de nacimiento en formato ddmmaaaa), sin requerir un flujo de usuario/contraseña tradicional.
 
 #### Scenario: Identificación correcta
-- **WHEN** el alumno ingresa su matrícula y PIN correctos
+- **WHEN** el alumno ingresa su identificador y PIN correctos
 - **THEN** el sistema lo identifica y procede a registrar su confirmación
 
 ### Requirement: Bloqueo por intentos fallidos de PIN
-El sistema SHALL bloquear nuevos intentos de identificación de una matrícula tras un número configurable de intentos fallidos consecutivos de PIN (default: 15, en archivo de propiedades).
+El sistema SHALL bloquear nuevos intentos de identificación de un identificador de alumno tras un número configurable de intentos fallidos consecutivos de PIN (default: 15, en archivo de propiedades).
 
 #### Scenario: Bloqueo tras agotar intentos
 - **WHEN** un alumno falla su PIN el número de veces configurado
-- **THEN** el sistema bloquea nuevos intentos para esa matrícula hasta que el profesor o dirección lo desbloqueen
+- **THEN** el sistema bloquea nuevos intentos para ese identificador hasta que el profesor o dirección lo desbloqueen
 
 ### Requirement: Reconocimiento ligero de dispositivo
-El sistema SHALL requerir la identificación completa (matrícula + PIN) solo la primera vez que un dispositivo confirma asistencia. En confirmaciones subsecuentes desde el mismo dispositivo, SHALL reconocer al alumno sin solicitar el PIN nuevamente.
+El sistema SHALL requerir la identificación completa (identificador + PIN) solo la primera vez que un dispositivo confirma asistencia. En confirmaciones subsecuentes desde el mismo dispositivo, SHALL reconocer al alumno sin solicitar el PIN nuevamente.
 
 #### Scenario: Segunda confirmación desde el mismo dispositivo
 - **WHEN** un alumno ya identificado en su tablet escanea un nuevo QR de una materia distinta el mismo día
-- **THEN** el sistema lo reconoce sin pedirle matrícula y PIN de nuevo
+- **THEN** el sistema lo reconoce sin pedirle identificador y PIN de nuevo
 
 #### Scenario: Confirmación desde un dispositivo distinto
 - **WHEN** el alumno intenta confirmar asistencia desde un dispositivo no reconocido previamente
-- **THEN** el sistema solicita matrícula y PIN completos
+- **THEN** el sistema solicita identificador y PIN completos
 
 ### Requirement: Manejo de QR expirado
 Si el token leído por el alumno ya no está vigente, el sistema SHALL rechazar la confirmación e indicarle que debe volver a escanear el QR actual, sin ofrecer margen de gracia sobre el token vencido.

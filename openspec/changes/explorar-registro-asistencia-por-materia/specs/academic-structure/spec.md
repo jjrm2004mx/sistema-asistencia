@@ -11,6 +11,21 @@ El sistema SHALL soportar múltiples planteles, cada uno con sus propios profeso
 - **WHEN** existen dos planteles distintos en el sistema
 - **THEN** los datos de profesores, materias, grupos y alumnos de un plantel no son visibles ni accesibles desde el otro plantel
 
+### Requirement: Tipo de identificador de alumno configurable por plantel
+Cada plantel SHALL configurar un único tipo de identificador para sus alumnos — **matrícula** o **correo institucional** — dado que no todas las escuelas manejan matrícula. Todos los alumnos de un mismo plantel SHALL usar el mismo tipo (no se mezclan ambos dentro de un mismo plantel). Este identificador SHALL ser único dentro del plantel y es el que usan alumno y padre/tutor para identificarse en los flujos de matrícula/correo+PIN (ver `attendance-confirmation` y `student-parent-access`). El sistema puede mantener además un ID interno propio del alumno, pero alumno, padre/tutor y profesor no SHALL necesitar conocerlo ni usarlo.
+
+#### Scenario: Plantel configurado con matrícula
+- **WHEN** un plantel tiene configurado el tipo de identificador "matrícula"
+- **THEN** todos sus alumnos se dan de alta con una matrícula como identificador único, y los flujos de confirmación de asistencia y consulta de historial solicitan matrícula+PIN
+
+#### Scenario: Plantel configurado con correo institucional
+- **WHEN** un plantel tiene configurado el tipo de identificador "correo institucional"
+- **THEN** todos sus alumnos se dan de alta con su correo institucional como identificador único, y los flujos de confirmación de asistencia y consulta de historial solicitan correo institucional+PIN en vez de matrícula
+
+#### Scenario: Identificador duplicado dentro del plantel
+- **WHEN** se intenta dar de alta un alumno cuyo identificador (matrícula o correo institucional, según lo configurado) ya existe en ese plantel
+- **THEN** el sistema rechaza el alta
+
 ### Requirement: Alta de catálogo base por dirección
 Dirección/Admin de plantel SHALL poder dar de alta materias, profesores, grupos y alumnos de su plantel, de forma individual o mediante importación por CSV.
 
@@ -19,7 +34,7 @@ Dirección/Admin de plantel SHALL poder dar de alta materias, profesores, grupos
 - **THEN** el profesor queda registrado en el plantel y disponible para ser asignado a materias y grupos
 
 #### Scenario: Alta masiva por CSV
-- **WHEN** dirección sube un archivo CSV con múltiples alumnos
+- **WHEN** dirección sube un archivo CSV con múltiples alumnos, con la columna de identificador correspondiente al tipo configurado para su plantel (matrícula o correo institucional)
 - **THEN** el sistema crea todos los registros válidos del archivo
 
 ### Requirement: Inscripción de alumnos a grupos

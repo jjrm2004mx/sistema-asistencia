@@ -5,7 +5,7 @@ Define los mecanismos de autenticación y aprovisionamiento de cuentas para cada
 ## ADDED Requirements
 
 ### Requirement: Login tradicional para profesor y dirección
-Profesor y dirección SHALL autenticarse mediante usuario y contraseña, con credenciales almacenadas en base de datos, a diferencia del mecanismo de matrícula+PIN usado por alumno y padre/tutor.
+Profesor y dirección SHALL autenticarse mediante usuario y contraseña, con credenciales almacenadas en base de datos, a diferencia del mecanismo de identificador+PIN (matrícula o correo institucional, según el plantel) usado por alumno y padre/tutor.
 
 #### Scenario: Login exitoso
 - **WHEN** un profesor ingresa su usuario y contraseña correctos
