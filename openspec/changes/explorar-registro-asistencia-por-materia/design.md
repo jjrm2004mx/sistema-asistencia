@@ -1,6 +1,6 @@
 ## Context
 
-Ver `proposal.md` para la motivación completa. Este documento cubre el **cómo** técnico: stack, infraestructura y decisiones de arquitectura. Se construyó **de forma incremental** junto con la conversación de diseño técnico. Las decisiones fundacionales (hosting, tiempo real, backend, frontend, esquema de base de datos) ya están cerradas; queda abierto el punto marcado como pendiente en "Esquema de base de datos" (qué capabilities son toggleables por plantel) y lo que surja al implementar.
+Ver `proposal.md` para la motivación completa. Este documento cubre el **cómo** técnico: stack, infraestructura y decisiones de arquitectura. Se construyó **de forma incremental** junto con la conversación de diseño técnico. Todas las decisiones fundacionales (hosting, tiempo real, backend, frontend, esquema de base de datos, incluyendo qué capabilities son toggleables por plantel) ya están cerradas; queda abierto solo lo que surja al implementar.
 
 ## Goals / Non-Goals
 
@@ -205,10 +205,22 @@ Nivel arquitectura — entidades, campos clave y relaciones. Tipos de columna, c
 
 **Razonamiento**: `tolerancia_minutos` es el único campo que aplica exclusivamente a rol=PROFESOR (queda NULL para dirección y super-administrador); todo lo demás (correo, password_hash, rol, plantel_id) es común a los tres. Una tabla con un campo específico NULL para dos de tres roles es más simple que tres tablas con lógica de auth repetida.
 
+### Funcionalidades toggleables por plantel: solo 2 de las 9 capabilities
+
+**Decisión**: de las 9 capabilities, solo `attendance-justification` y `student-parent-access` son toggleables por plantel vía `plantel_funcionalidad` (ver `super-admin-dashboard`, "Gestión de funcionalidades habilitadas por plantel"). Las otras 6 — `auth-accounts`, `academic-structure`, `attendance-session`, `attendance-confirmation`, `teacher-dashboard`, `admin-dashboard` — SHALL estar siempre activas, sin representarse en `plantel_funcionalidad`. `super-admin-dashboard` no aplica al concepto: no es una capability "por plantel", es cross-plantel y no depende de ningún plantel específico.
+
+**Criterio usado**: una capability es candidata a toggleable solo si deshabilitarla no deja a ningún rol sin pantalla de destino tras el login. `teacher-dashboard` y `admin-dashboard` son el destino de enrutamiento post-login de profesor y dirección (ver `auth-accounts`, "Rol explícito por cuenta y enrutamiento post-login") — y toda alta de plantel nuevo crea automáticamente una cuenta de dirección (ver `super-admin-dashboard`, "Alta de plantel nuevo"), así que deshabilitar `admin-dashboard` dejaría a esa cuenta sin ningún lugar a donde ir tras autenticarse; lo mismo aplica a `teacher-dashboard` en cuanto exista al menos un profesor. `attendance-session` y `attendance-confirmation` son el mecanismo central de toma de asistencia — deshabilitarlos no es "quitar una funcionalidad", es dejar de usar el sistema. `attendance-justification` y `student-parent-access` sí son seguras: son capas de valor agregado sobre el núcleo, y si se deshabilitan ningún rol pierde su pantalla de entrada — el profesor simplemente deja de ver el botón "Justificar" y el alumno/padre deja de tener el portal, sin dejar ninguna cuenta varada.
+
+**Alternativas consideradas**:
+- **Las 9 capabilities toggleables** (interpretación original, ambigua) — descartada: deshabilitar `admin-dashboard` o `teacher-dashboard` para un plantel dejaría cuentas ya creadas (dirección o profesor) sin ruta de destino tras el login, un estado inconsistente que el sistema no maneja en ningún lado.
+- **Usar la deshabilitación completa de un plantel para el caso "dirección sin tablero"** — ya existe como mecanismo separado (`super-admin-dashboard`, "Deshabilitación completa de un plantel"); no hace falta duplicar ese caso de uso a nivel de capability individual.
+
+**Razonamiento**: el mecanismo de toggle está pensado principalmente para funcionalidades **futuras** que se agreguen al sistema más adelante — con las 9 capabilities actuales, el margen real de "apagar sin romper nada" resultó ser angosto (solo 2), pero la tabla puente `plantel_funcionalidad` queda lista para crecer cuando aparezcan nuevas capabilities de valor agregado sin necesidad de rediseñar el esquema.
+
 ### Entidades
 
 - **`plantel`**: id, nombre, `tipo_identificador_alumno` (MATRICULA | CORREO_INSTITUCIONAL, bloqueado tras el primer alumno — ver `academic-structure`), `cupo_profesores`, `cupo_direccion`, `activo` (deshabilitación completa, ver `super-admin-dashboard`).
-- **`plantel_funcionalidad`**: `plantel_id` (FK), `capability` (enum de las capabilities toggleables), `habilitada` (bool) — tabla puente N:N para "Funcionalidades habilitadas por plantel". *Pendiente de decidir cuáles de las 9 capabilities son toggleables vs. siempre activas (`academic-structure` y `auth-accounts` son candidatas obvias a "siempre activas", son la base del sistema) — no está definido en los specs todavía.*
+- **`plantel_funcionalidad`**: `plantel_id` (FK), `capability` (enum: `JUSTIFICACION` | `CONSULTA_HISTORIAL` — las únicas 2 toggleables, ver decisión arriba), `habilitada` (bool) — tabla puente N:N para "Funcionalidades habilitadas por plantel". Las demás 7 capabilities no tienen fila aquí: siempre están activas y no pasan por esta tabla.
 - **`cuenta`**: id, `correo` (único por `plantel_id`; sin restricción de unicidad cruzada para super-administrador, que no tiene plantel), `password_hash`, `rol` (PROFESOR | DIRECCION | SUPER_ADMINISTRADOR), `plantel_id` (FK, NULL si rol=SUPER_ADMINISTRADOR), `tolerancia_minutos` (solo aplica si rol=PROFESOR; default 5, configurable — ver `attendance-session`).
 - **`materia`**: id, `plantel_id` (FK), nombre.
 - **`grupo`**: id, `plantel_id` (FK), nombre.

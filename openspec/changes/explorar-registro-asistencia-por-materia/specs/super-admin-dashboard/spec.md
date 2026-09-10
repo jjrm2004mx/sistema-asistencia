@@ -18,6 +18,10 @@ El super-administrador SHALL poder ver y cambiar, desde su tablero, qué capabil
 - **WHEN** el super-administrador habilita una capability para un plantel
 - **THEN** esa funcionalidad queda disponible de inmediato para las cuentas de ese plantel
 
+#### Scenario: Solo dos capabilities son toggleables
+- **WHEN** el super-administrador abre la gestión de funcionalidades de un plantel
+- **THEN** solo ve `attendance-justification` y `student-parent-access` como opciones — las demás 6 capabilities de plantel están siempre activas y no aparecen ahí; el mecanismo queda listo para que futuras capabilities de valor agregado se sumen a esta lista sin rediseñar el esquema
+
 ### Requirement: Gestión de cupo de cuentas por plantel
 El super-administrador SHALL poder ver y cambiar, desde su tablero, el cupo máximo de cuentas de profesor y de dirección de cada plantel (ver `academic-structure`, "Cupo de cuentas por plantel").
 

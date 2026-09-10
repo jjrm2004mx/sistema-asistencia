@@ -26,6 +26,10 @@ Cada plantel SHALL tener un conjunto de capabilities habilitadas de forma indepe
 - **WHEN** el super-administrador habilita o deshabilita una funcionalidad para un plantel desde `super-admin-dashboard`
 - **THEN** el cambio aplica de inmediato a todas las cuentas de ese plantel
 
+#### Scenario: Alcance de las funcionalidades toggleables
+- **WHEN** dirección ve la lista de funcionalidades de su plantel
+- **THEN** solo `attendance-justification` (justificación de faltas) y `student-parent-access` (consulta de historial) aparecen como capabilities que pueden estar activas o inactivas; el resto de capabilities (incluyendo `academic-structure` y `admin-dashboard`) SHALL estar siempre activas y no aparecer ahí como algo deshabilitable — deshabilitarlas dejaría cuentas ya creadas sin ninguna pantalla de destino tras el login
+
 ### Requirement: Cupo de cuentas por plantel
 Cada plantel SHALL tener un cupo máximo de cuentas de profesor y un cupo máximo de cuentas de dirección, independientes entre sí, fijados por el super-administrador desde `super-admin-dashboard` — dado que el modelo de negocio SaaS cobra por licencia/cuenta. Dirección SHALL poder ver su cupo y cuántas cuentas tiene en uso por rol, pero no SHALL tener ningún mecanismo en la interfaz para aumentarlo ella misma.
 
