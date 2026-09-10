@@ -9,13 +9,13 @@ El tablero de dirección SHALL usar la misma navegación de calendario (mes/sema
 
 #### Scenario: Vista agregada del día
 - **WHEN** dirección entra a su tablero
-- **THEN** ve el resumen del día con todas las sesiones programadas del plantel, no solo las de un profesor
+- **THEN** ve el resumen del día con todas las sesiones de clase programadas del plantel, no solo las de un profesor
 
 ### Requirement: Siete resúmenes a nivel plantel
-El tablero SHALL mostrar: (1) resumen del día del plantel completo, (2) porcentaje de asistencia por grupo, (3) ranking de faltas/tardanzas del plantel, (4) racha de faltas consecutivas por alumno, (5) justificantes justificados vs. sin justificar, (6) lista de profesores que aún no han pasado lista en sus sesiones del día, y (7) conteo de motivos de justificantes pendientes de aprobar.
+El tablero SHALL mostrar: (1) resumen del día del plantel completo, (2) porcentaje de asistencia por grupo, (3) ranking de faltas/tardanzas del plantel, (4) racha de faltas consecutivas por alumno, (5) justificantes justificados vs. sin justificar, (6) lista de profesores que aún no han pasado lista en sus sesiones de clase del día, y (7) conteo de motivos de justificantes pendientes de aprobar.
 
 #### Scenario: Profesores pendientes de pasar lista
-- **WHEN** un profesor tiene una sesión programada según su horario y no la ha iniciado
+- **WHEN** un profesor tiene una sesión de clase programada según su horario y no la ha iniciado
 - **THEN** ese profesor aparece en la lista de "profesores que aún no han pasado lista hoy"
 
 ### Requirement: Aprobación del catálogo de justificantes
@@ -30,4 +30,4 @@ Dirección SHALL poder generar una nueva contraseña temporal para un profesor, 
 
 #### Scenario: Profesor olvida su contraseña
 - **WHEN** dirección genera una nueva contraseña temporal para un profesor
-- **THEN** el profesor puede iniciar sesión con la nueva contraseña entregada por dirección
+- **THEN** el profesor puede iniciar sesión de usuario (login) con la nueva contraseña entregada por dirección

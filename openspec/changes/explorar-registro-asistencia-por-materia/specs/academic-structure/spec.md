@@ -11,6 +11,65 @@ El sistema SHALL soportar múltiples planteles, cada uno con sus propios profeso
 - **WHEN** existen dos planteles distintos en el sistema
 - **THEN** los datos de profesores, materias, grupos y alumnos de un plantel no son visibles ni accesibles desde el otro plantel
 
+### Requirement: Funcionalidades habilitadas por plantel
+Cada plantel SHALL tener un conjunto de capabilities habilitadas de forma independiente entre sí (no un plan cerrado tipo Básico/Completo), determinando qué funcionalidades del sistema están disponibles para ese plantel. Dirección SHALL poder ver qué funcionalidades tiene habilitadas su plantel, pero no SHALL tener ningún mecanismo en la interfaz para habilitarlas o deshabilitarlas ella misma — ese cambio se hace desde `super-admin-dashboard`.
+
+#### Scenario: Plantel con funcionalidad deshabilitada
+- **WHEN** una capability está deshabilitada para un plantel
+- **THEN** el sistema oculta o bloquea el acceso a esa funcionalidad para todas las cuentas de ese plantel (profesor y dirección)
+
+#### Scenario: Dirección no puede autohabilitarse funcionalidades
+- **WHEN** dirección busca en su tablero un mecanismo para habilitar una funcionalidad no disponible en su plantel
+- **THEN** el sistema no ofrece ninguna acción para hacerlo; solo puede ver cuáles tiene habilitadas
+
+#### Scenario: Cambio de funcionalidades habilitadas
+- **WHEN** el super-administrador habilita o deshabilita una funcionalidad para un plantel desde `super-admin-dashboard`
+- **THEN** el cambio aplica de inmediato a todas las cuentas de ese plantel
+
+#### Scenario: Alcance de las funcionalidades toggleables
+- **WHEN** dirección ve la lista de funcionalidades de su plantel
+- **THEN** solo `attendance-justification` (justificación de faltas) y `student-parent-access` (consulta de historial) aparecen como capabilities que pueden estar activas o inactivas; el resto de capabilities (incluyendo `academic-structure` y `admin-dashboard`) SHALL estar siempre activas y no aparecer ahí como algo deshabilitable — deshabilitarlas dejaría cuentas ya creadas sin ninguna pantalla de destino tras el login
+
+### Requirement: Cupo de cuentas por plantel
+Cada plantel SHALL tener un cupo máximo de cuentas de profesor y un cupo máximo de cuentas de dirección, independientes entre sí, fijados por el super-administrador desde `super-admin-dashboard` — dado que el modelo de negocio SaaS cobra por licencia/cuenta. Dirección SHALL poder ver su cupo y cuántas cuentas tiene en uso por rol, pero no SHALL tener ningún mecanismo en la interfaz para aumentarlo ella misma.
+
+#### Scenario: Alta dentro del cupo
+- **WHEN** dirección da de alta a un profesor o a otra cuenta de dirección y el plantel no ha alcanzado su cupo para ese rol
+- **THEN** el sistema crea la cuenta con normalidad
+
+#### Scenario: Alta rechazada por cupo alcanzado
+- **WHEN** dirección intenta dar de alta una cuenta de un rol (profesor o dirección) cuyo cupo ya está al máximo
+- **THEN** el sistema rechaza el alta e indica que se alcanzó el cupo de licencias para ese rol
+
+#### Scenario: Ampliar el cupo desde super-admin-dashboard
+- **WHEN** el super-administrador aumenta el cupo de cuentas de un plantel (ej. tras renovar o ampliar su licencia)
+- **THEN** dirección de ese plantel puede dar de alta cuentas de ese rol hasta el nuevo máximo
+
+### Requirement: Tipo de identificador de alumno configurable por plantel
+Dirección SHALL configurar, desde su tablero y como parte del setup inicial de su plantel, un único tipo de identificador para sus alumnos — **matrícula** o **correo institucional** — dado que no todas las escuelas manejan matrícula. Todos los alumnos de un mismo plantel SHALL usar el mismo tipo (no se mezclan ambos dentro de un mismo plantel). Este identificador SHALL ser único dentro del plantel y es el que usan alumno y padre/tutor para identificarse en los flujos de matrícula/correo+PIN (ver `attendance-confirmation` y `student-parent-access`). El sistema puede mantener además un ID interno propio del alumno, pero alumno, padre/tutor y profesor no SHALL necesitar conocerlo ni usarlo.
+
+Una vez que el plantel tiene al menos un alumno dado de alta, el tipo de identificador configurado SHALL quedar bloqueado — el sistema no SHALL permitir cambiarlo, para evitar inconsistencias con alumnos ya identificados bajo el tipo anterior.
+
+#### Scenario: Plantel configurado con matrícula
+- **WHEN** un plantel tiene configurado el tipo de identificador "matrícula"
+- **THEN** todos sus alumnos se dan de alta con una matrícula como identificador único, y los flujos de confirmación de asistencia y consulta de historial solicitan matrícula+PIN
+
+#### Scenario: Plantel configurado con correo institucional
+- **WHEN** un plantel tiene configurado el tipo de identificador "correo institucional"
+- **THEN** todos sus alumnos se dan de alta con su correo institucional como identificador único, y los flujos de confirmación de asistencia y consulta de historial solicitan correo institucional+PIN en vez de matrícula
+
+#### Scenario: Identificador duplicado dentro del plantel
+- **WHEN** se intenta dar de alta un alumno cuyo identificador (matrícula o correo institucional, según lo configurado) ya existe en ese plantel
+- **THEN** el sistema rechaza el alta
+
+#### Scenario: Configuración libre antes del primer alumno
+- **WHEN** el plantel todavía no tiene ningún alumno dado de alta
+- **THEN** dirección puede configurar o cambiar libremente el tipo de identificador desde su tablero
+
+#### Scenario: Tipo de identificador bloqueado tras el primer alumno
+- **WHEN** el plantel ya tiene al menos un alumno dado de alta y dirección intenta cambiar el tipo de identificador
+- **THEN** el sistema rechaza el cambio
+
 ### Requirement: Alta de catálogo base por dirección
 Dirección/Admin de plantel SHALL poder dar de alta materias, profesores, grupos y alumnos de su plantel, de forma individual o mediante importación por CSV.
 
@@ -19,7 +78,7 @@ Dirección/Admin de plantel SHALL poder dar de alta materias, profesores, grupos
 - **THEN** el profesor queda registrado en el plantel y disponible para ser asignado a materias y grupos
 
 #### Scenario: Alta masiva por CSV
-- **WHEN** dirección sube un archivo CSV con múltiples alumnos
+- **WHEN** dirección sube un archivo CSV con múltiples alumnos, con la columna de identificador correspondiente al tipo configurado para su plantel (matrícula o correo institucional)
 - **THEN** el sistema crea todos los registros válidos del archivo
 
 ### Requirement: Inscripción de alumnos a grupos
@@ -27,20 +86,20 @@ Un alumno SHALL estar inscrito a uno o más grupos, y esa inscripción determina
 
 #### Scenario: Alumno inscrito ve sus materias
 - **WHEN** un alumno está inscrito en un grupo
-- **THEN** puede confirmar asistencia únicamente en las sesiones de las materias asignadas a ese grupo
+- **THEN** puede confirmar asistencia únicamente en las sesiones de clase de las materias asignadas a ese grupo
 
 ### Requirement: Asignación de profesor a materia y grupo
 Dirección SHALL poder crear una asignación que vincule un profesor, una materia y un grupo. Un profesor puede tener múltiples asignaciones y una materia puede tener múltiples profesores.
 
 #### Scenario: Profesor con varias materias
 - **WHEN** un profesor tiene asignaciones a dos materias distintas
-- **THEN** puede iniciar sesiones de asistencia para ambas
+- **THEN** puede iniciar sesiones de clase para ambas
 
 ### Requirement: Horario informativo, no restrictivo
-Cada asignación SHALL poder tener un horario (día de la semana y hora) que sirve como referencia, sin restringir cuándo el profesor puede abrir una sesión.
+Cada asignación SHALL poder tener un horario (día de la semana y hora) que sirve como referencia, sin restringir cuándo el profesor puede abrir una sesión de clase.
 
-#### Scenario: Profesor abre sesión fuera de horario
-- **WHEN** un profesor con una asignación abre una sesión de asistencia en un horario distinto al registrado
+#### Scenario: Profesor abre sesión de clase fuera de horario
+- **WHEN** un profesor con una asignación abre una sesión de clase en un horario distinto al registrado
 - **THEN** el sistema permite la acción sin bloquearla
 
 ### Requirement: Materias siempre ligadas a un grupo fijo

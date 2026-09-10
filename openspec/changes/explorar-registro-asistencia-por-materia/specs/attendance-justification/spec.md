@@ -5,14 +5,14 @@ Define cómo el profesor justifica faltas de sus alumnos y cómo se gestiona el 
 ## ADDED Requirements
 
 ### Requirement: Justificación exclusiva del profesor
-Solo el profesor de la materia/sesión SHALL poder justificar una falta de un alumno en esa sesión. El sistema no SHALL ofrecer un flujo de justificación por padres/tutores ni por el alumno.
+Solo el profesor de la materia/sesión de clase SHALL poder justificar una falta de un alumno en esa sesión de clase. El sistema no SHALL ofrecer un flujo de justificación por padres/tutores ni por el alumno.
 
 #### Scenario: Profesor justifica una falta
-- **WHEN** el profesor de una sesión marca una falta de un alumno como justificada
+- **WHEN** el profesor de una sesión de clase marca una falta de un alumno como justificada
 - **THEN** el registro cambia su estado a Falta Justificada de inmediato, sin requerir aprobación previa
 
 ### Requirement: Alcance de la justificación
-Solo las faltas SHALL poder justificarse; las tardanzas no SHALL ser justificables. La justificación SHALL aplicarse por materia/sesión individual, sin propagarse automáticamente a otras sesiones del mismo día.
+Solo las faltas SHALL poder justificarse; las tardanzas no SHALL ser justificables. La justificación SHALL aplicarse por materia/sesión de clase individual, sin propagarse automáticamente a otras sesiones de clase del mismo día.
 
 #### Scenario: Falta en múltiples materias el mismo día
 - **WHEN** un alumno tiene falta en tres materias del mismo día por el mismo motivo
@@ -38,3 +38,10 @@ El sistema SHALL permitir justificar una falta en cualquier momento, sin fecha l
 #### Scenario: Justificación de una falta antigua
 - **WHEN** el profesor justifica una falta ocurrida varias semanas atrás
 - **THEN** el sistema aplica el cambio sin restricción de tiempo
+
+### Requirement: Acceso a la justificación desde el roster del profesor
+El profesor SHALL poder iniciar la justificación de una falta directamente desde el roster de `teacher-dashboard`, sin salir del contexto de la sesión de clase hacia una sección no relacionada.
+
+#### Scenario: Profesor justifica desde el roster
+- **WHEN** el profesor ve a un alumno en estado Falta en el roster de una sesión de clase
+- **THEN** puede iniciar la justificación de esa falta directamente desde esa fila
