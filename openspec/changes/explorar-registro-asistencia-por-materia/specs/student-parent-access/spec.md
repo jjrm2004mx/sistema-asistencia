@@ -35,3 +35,18 @@ Alumno y padre/tutor SHALL tener acceso exclusivamente de solo lectura; no SHALL
 #### Scenario: Intento de modificar un registro
 - **WHEN** un alumno o padre accede a su historial
 - **THEN** el sistema no ofrece ninguna acción de edición o justificación sobre los registros mostrados
+
+### Requirement: Orientación de clase en curso al identificarse
+Al identificarse correctamente, si existe una sesión de clase activa en ese momento para alguna de las materias/grupos del alumno, el sistema SHALL mostrarle un aviso informativo (materia y grupo) invitándolo a escanear el QR proyectado, junto con el acceso a su historial. Este aviso no SHALL permitir confirmar asistencia directamente desde aquí — la confirmación sigue requiriendo escanear el QR vigente (ver `attendance-confirmation`). Si no existe ninguna sesión de clase activa, el sistema SHALL mostrar únicamente el acceso a su historial.
+
+#### Scenario: Alumno se identifica durante su clase
+- **WHEN** un alumno se identifica y tiene una sesión de clase activa en ese momento
+- **THEN** el sistema le muestra un aviso con la materia y el grupo de esa sesión, invitándolo a escanear el QR proyectado, junto con el acceso a su historial
+
+#### Scenario: Alumno se identifica fuera de horario de clase
+- **WHEN** un alumno se identifica y no tiene ninguna sesión de clase activa en ese momento
+- **THEN** el sistema le muestra únicamente el acceso a su historial, sin ningún aviso de clase en curso
+
+#### Scenario: El aviso no permite confirmar asistencia
+- **WHEN** el alumno ve el aviso de clase en curso
+- **THEN** el sistema no ofrece ningún botón que registre su asistencia directamente — solo lo orienta a escanear el QR proyectado

@@ -38,3 +38,10 @@ El sistema SHALL permitir justificar una falta en cualquier momento, sin fecha l
 #### Scenario: Justificación de una falta antigua
 - **WHEN** el profesor justifica una falta ocurrida varias semanas atrás
 - **THEN** el sistema aplica el cambio sin restricción de tiempo
+
+### Requirement: Acceso a la justificación desde el roster del profesor
+El profesor SHALL poder iniciar la justificación de una falta directamente desde el roster de `teacher-dashboard`, sin salir del contexto de la sesión de clase hacia una sección no relacionada.
+
+#### Scenario: Profesor justifica desde el roster
+- **WHEN** el profesor ve a un alumno en estado Falta en el roster de una sesión de clase
+- **THEN** puede iniciar la justificación de esa falta directamente desde esa fila

@@ -16,11 +16,15 @@ El tablero SHALL presentar una vista de calendario navegable (mes/semana/día) c
 - **THEN** el sistema muestra el roster y controles de esa sesión de clase pasada en la misma pantalla, sin una sección aparte
 
 ### Requirement: Roster en vivo de la sesión de clase
-El tablero SHALL mostrar, para la sesión de clase seleccionada, el listado de alumnos inscritos con su estado individual (Presente, Tardanza, Falta, Pendiente) actualizado en tiempo real.
+El tablero SHALL mostrar, para la sesión de clase seleccionada, el listado de alumnos inscritos con su estado individual (Presente, Tardanza, Falta, Falta Justificada, Pendiente) actualizado en tiempo real. Falta Justificada SHALL distinguirse visualmente de Falta — no son el mismo estado.
 
 #### Scenario: Alumno confirma mientras el profesor observa
 - **WHEN** un alumno confirma su asistencia
 - **THEN** el estado de ese alumno se actualiza en el roster del profesor sin recargar la página
+
+#### Scenario: Falta justificada se distingue de falta sin justificar
+- **WHEN** el profesor justifica la falta de un alumno (ver `attendance-justification`)
+- **THEN** el roster deja de mostrarlo como Falta y lo muestra como Falta Justificada
 
 ### Requirement: Marcado manual sin restricción de momento
 El profesor SHALL poder marcar manualmente el estado de asistencia de cualquier alumno en cualquier sesión de clase — activa, cerrada, o de un día anterior — en cualquier momento.

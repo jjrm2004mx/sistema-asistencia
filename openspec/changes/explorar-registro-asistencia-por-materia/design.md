@@ -143,7 +143,7 @@ com.sistemaasistencia
 - **`attendance_justification`**: `POST /api/registros-asistencia/{id}/justificar`, `GET /api/motivos-justificacion`.
 - **`teacher_dashboard`**: `GET /api/tablero-profesor/sesiones?fecha=`, `GET /api/tablero-profesor/resumenes?mes=`, `GET /api/sesiones-clase/{id}/resumen-cierre` (conteo de confirmados + lista nominal de alumnos sin registro; vive en `attendance_session` pero atiende este requirement).
 - **`admin_dashboard`**: `GET /api/tablero-direccion/sesiones?fecha=` (todas las sesiones del plantel, agregado), `GET /api/tablero-direccion/resumenes?mes=`, `PATCH /api/motivos-justificacion/{id}/aprobar`, `DELETE /api/motivos-justificacion/{id}`, `POST /api/cuentas/{id}/reset-password`.
-- **`student_parent_access`**: `POST /api/consulta-historial` (identificador+PIN, abre la sesión corta), `GET /api/consulta-historial/mes-actual`.
+- **`student_parent_access`**: `POST /api/consulta-historial` (identificador+PIN, abre la sesión corta), `GET /api/consulta-historial/mes-actual`, `GET /api/consulta-historial/sesion-actual` (dentro de la sesión corta ya abierta — informa si hay una sesión de clase activa ahora mismo para alguna asignación del alumno, sin exponer token de QR ni permitir confirmar desde aquí).
 - **`super_admin_dashboard`**: `GET /api/planteles` (para elegir cuál administrar), `POST /api/planteles` (alta de plantel nuevo), `PATCH /api/planteles/{id}/funcionalidades`, `PATCH /api/planteles/{id}/cupo-cuentas`, `POST /api/planteles/{id}/restablecer-acceso-direccion`, `POST /api/cuentas` (alta de otra cuenta super-admin). Deshabilitar un plantel por completo sigue sin endpoint — se mantiene manual en base de datos.
 
 **Alternativas consideradas**:
@@ -161,6 +161,15 @@ com.sistemaasistencia
 - **JWT sin estado** — no descartado de forma permanente, dejado como puerta abierta: si el sistema eventualmente necesita más de una instancia del backend (más allá del alcance actual de una sola VM), JWT evita depender de sesión en memoria de una sola instancia. Por ahora, con una sola instancia, "logout inmediato" con JWT normalmente requeriría igual una blocklist de tokens revocados del lado servidor — reintroduce el mismo estado que se supone que JWT evita, sin ganar nada a cambio en el escenario actual.
 
 **Razonamiento**: la decisión de sesión sigue la misma lógica que las demás decisiones de esta fase — resolver con lo más simple que satisface los requirements ya escritos, dado el contexto ya fijado (una VM, un operador), dejando explícito el trigger para reconsiderar (pasar a más de una instancia) en vez de sobre-diseñar para una escala que no existe todavía.
+
+### Portal de entrada del alumno: orienta hacia el QR, no lo sustituye
+
+**Decisión**: la identificación de `student-parent-access` (identificador+PIN, sesión corta) funciona como punto de entrada único del alumno. Al identificarse, si existe una sesión de clase activa en ese momento para alguna de sus asignaciones, el sistema le muestra un aviso informativo (materia y grupo) invitándolo a escanear el QR proyectado — junto con el acceso a su historial. Si no hay ninguna sesión activa, solo se muestra el acceso al historial. El aviso es puramente informativo: no expone ningún mecanismo para registrar asistencia directamente desde ahí. No requiere cambios al esquema de base de datos — es una lectura sobre `sesion_clase`/`asignacion`/`inscripcion`, entidades ya existentes.
+
+**Alternativas consideradas**:
+- **Permitir confirmar asistencia directamente desde el portal, sin escanear el QR** — descartado explícitamente: anularía la decisión de "Mecanismo de tiempo real" que hace del QR proyectado con rotación la única defensa contra suplantación (ver también "Identificación del alumno: PIN en cada confirmación, sin reconocimiento de dispositivo"). El QR obliga a que el alumno esté físicamente frente al proyector en ese momento; un botón de confirmación en un portal accesible desde cualquier dispositivo no da esa garantía y reabriría el riesgo de asistencia falsa sin necesidad de estar en el salón.
+
+**Razonamiento**: el alumno hoy no tiene ninguna señal de "es tu hora de confirmar" fuera de ver el proyector — este aviso mejora el descubrimiento del flujo real (que sigue siendo 100% vía QR) sin tocar el modelo de amenaza ya cerrado. Reutiliza la sesión corta que `student-parent-access` ya abre, sin introducir un mecanismo de autenticación nuevo.
 
 ### Frontend: SPA con React, servida como recurso estático del propio backend
 
